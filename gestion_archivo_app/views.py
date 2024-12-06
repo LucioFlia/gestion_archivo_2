@@ -382,7 +382,3 @@ def delete_documentation(request, doc_id):
 
     # Redirigir de nuevo a la vista de edición de documentaciones
     return redirect("edit_box_documentation", box_id=box.id)
-
-
-
-#Token_ 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
