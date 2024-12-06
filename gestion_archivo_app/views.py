@@ -382,3 +382,6 @@ def delete_documentation(request, doc_id):
 
     # Redirigir de nuevo a la vista de edición de documentaciones
     return redirect("edit_box_documentation", box_id=box.id)
+
+
+    
