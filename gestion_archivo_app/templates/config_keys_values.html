@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}System Configuration{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="text-center mb-0">Config Keys->Values</h4>
+        </div>
+        <div class="card-body">
+
+
+            {% if error %}
+            <div class="alert alert-danger text-center">{{ error }}</div>
+        {% endif %}
+    
+        <!-- Formulario para agregar o editar configuración -->
+        <form method="post" class="mb-4">
+            {% csrf_token %}
+            <input type="hidden" name="config_id" id="config_id"> <!-- Para identificar edición -->
+            <div class="mb-3">
+                <label for="key" class="form-label">Key</label>
+                <input type="text" id="key" name="key" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="value" class="form-label">Value</label>
+                <textarea id="value" name="value" class="form-control" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea id="description" name="description" class="form-control" rows="2"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save"></i> Save Configuration </button>
+        </form>
+    
+        <!-- Tabla de configuraciones existentes -->
+        <h3 class="mt-4">Existing Configurations</h3>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Key</th>
+                    <th>Value</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for config in configs %}
+                    <tr>
+                        <td>{{ config.key }}</td>
+                        <td>{{ config.value }}</td>
+                        <td>{{ config.description }}</td>
+                        <td>
+                            <!-- Botón de editar -->
+                            <button class="btn btn-sm btn-warning" onclick="editConfig({{ config.id }}, '{{ config.key }}', '{{ config.value }}', '{{ config.description }}')">
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </button>
+                            <!-- Botón de eliminar -->
+                            <a href="?delete={{ config.id }}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this configuration?')">
+                                <i class="bi bi-trash"></i> Delete
+                            </a>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">No configurations found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+</div>
+</div></div>
+<script>
+function editConfig(id, key, value, description) {
+    document.getElementById('config_id').value = id;
+    document.getElementById('key').value = key;
+    document.getElementById('value').value = value;
+    document.getElementById('description').value = description;
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Opcional: Llevar al usuario al formulario
+}
+</script>
+{% endblock %}

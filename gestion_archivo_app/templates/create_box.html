@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Create Box{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="text-center mb-0">Create Box</h4>
+        </div>
+        <div class="card-body">
+            <form method="post" class="mb-4" action="{% url 'preview_box' %} ">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="box_name" class="form-label">Box Name</label>
+                    <input type="text" id="box_name" name="box_name" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea id="description" name="description" class="form-control" rows="3"></textarea>
+                </div>
+            <div class="mb-3">
+                <label for="box_type" class="form-label">Box Type</label>
+                <div class="input-group">
+                    
+                    <select id="box_type" name="box_type" class="form-select">
+                        {% for box_type in box_types %}
+                            <option value="{{ box_type.id }}">{{ box_type.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createBoxTypeModal">
+                        <i class="bi bi-plus-square"></i>  Add New Box Type
+                    </button>
+                </div>
+            </div>
+                <div class="mb-3">
+                    <label for="destruction_year" class="form-label">Destruction Year</label>
+                    <select id="destruction_year" name="destruction_year" class="form-select" required>
+                        {% for year in destruction_years %}
+                            <option value="{{ year }}" {% if year == suggested_year %}selected{% endif %}>{{ year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary "><i class="bi-arrow-right-circle"></i> Preview Box</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+            
+
+<!-- Modal -->
+<div class="modal fade" id="createBoxTypeModal" tabindex="-1" aria-labelledby="createBoxTypeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createBoxTypeModalLabel">Create New Box Type</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <iframe src="{% url 'create_box_type_modal' %}" frameborder="0" width="100%" height="400px"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+function addNewBoxType(id, name) {
+    const select = document.getElementById('box_type');
+    const option = document.createElement('option');
+    option.value = id;
+    option.textContent = name;
+    option.selected = true;
+    select.appendChild(option);
+
+    // Close the modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('createBoxTypeModal'));
+    modal.hide();       
+}
+</script>
+{% load static %}
+<script src="{% static 'js/table_utils.js' %}?pagination_limit={{ pagination_limit }}"></script>
+{% endblock %}

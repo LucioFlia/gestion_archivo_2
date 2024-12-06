@@ -1,0 +1,146 @@
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.conf import settings
+from django.db import models
+from datetime import datetime
+
+class User(AbstractUser):
+    ROLE_CHOICES = [
+        ('normal', 'Normal'),
+        ('manager', 'Manager'),
+        ('archive_responsible', 'Archive Responsible'),
+        ('admin', 'System Administrator')
+    ]
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    area = models.ForeignKey('Area', on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return self.username
+    
+
+class Area(models.Model):
+    name = models.CharField(max_length=100, unique=True, verbose_name="Nombre del Área")
+    description = models.TextField(blank=True, null=True, verbose_name="Descripción")
+
+    def __str__(self):
+        return self.name
+    
+ 
+class BoxType(models.Model):
+    name = models.CharField(max_length=100, unique=True, verbose_name="Box Type")
+    description = models.TextField(blank=True, null=True, verbose_name="Description")
+
+    def __str__(self):
+        return self.name
+
+class Box(models.Model):
+    STATUS_CHOICES = [
+        ('open', 'Open'),
+        ('closed', 'Closed'),
+    ]
+    name = models.CharField(max_length = 10, primary_key=False, verbose_name="Box Name", null=False, blank=False, unique=True)  
+    box_type = models.ForeignKey(BoxType, on_delete=models.PROTECT, related_name="boxes")
+    description = models.TextField(blank=True, null=True, verbose_name="Box Description")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="boxes")
+    area = models.ForeignKey(Area, on_delete=models.PROTECT, related_name="boxes")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='open')
+    id = models.AutoField(primary_key=True, verbose_name="Box ID")  # Auto-incremental ID
+    creation_date = models.DateTimeField(auto_now_add=True, verbose_name="Creation Date")
+    update_date =  models.DateTimeField(auto_now=True)
+    close_date = models.DateTimeField(blank=True, null=True, verbose_name="Close Date")
+    current_year = datetime.now().year
+
+    destruction_year = models.PositiveSmallIntegerField(
+        choices=[(year, str(year)) for year in range(current_year, 2100)],
+        verbose_name="Destruction Year"
+    )
+    current_area = models.ForeignKey(Area, on_delete=models.PROTECT, related_name="current_boxes", verbose_name="Current Area")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='open', verbose_name="Status")
+    total_sheets = models.PositiveIntegerField(default=0)  
+
+    def update_total_sheets(self):
+        """
+        Recalculate the total number of sheets from associated documents.
+        """
+        self.total_sheets = self.documentations.aggregate(
+            total=models.Sum('sheets')
+        )['total'] or 0
+        self.update_date = datetime.now()
+        self.save()
+    
+    
+    def close_box(self):
+        """Close the box and set the close_date to the current time."""
+        self.status = 'closed'
+        self.close_date = models.DateTimeField(auto_now_add=True)
+        self.save()
+
+    def __str__(self):
+        return f"Box ({self.box_type.name}) - {self.status}"
+
+
+
+
+class DocType(models.Model):
+    name = models.CharField(max_length=100, unique=True, verbose_name="Document Type")
+    description = models.TextField(blank=True, null=True, verbose_name="Description")
+
+    def __str__(self):
+        return self.name
+
+
+class Documentation(models.Model):
+    cuit_number = models.PositiveIntegerField(null=False, blank=False)
+    name = models.CharField(max_length=255, null=False, blank=False)  # Required
+    doc_type = models.ForeignKey(DocType, on_delete=models.PROTECT, related_name="documents")
+    description = models.TextField(blank=True, null=True, verbose_name="Document Description")
+    corpus = models.TextField(null=False, blank=False)  # Required
+    sheets = models.PositiveIntegerField(null=False, blank=False)  # Required
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT)  # Creator
+    creation_date = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
+    box = models.ForeignKey(Box, on_delete=models.CASCADE, related_name="documentations")  # Relation to Box
+
+    def __str__(self):
+        return f"{self.name} (Box: {self.box.name})"
+
+class SystemConfigKeyValues(models.Model):
+    key = models.CharField(max_length=100, unique=True)
+    value = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.key}: {self.value}"
+    
+
+
+
+class Universe(models.Model):
+    doc_number = models.PositiveIntegerField(null=False, blank=False)  
+    name = models.TextField(max_length=255, blank=True, null=False)  
+
+    def __str__(self):
+        return f"{self.doc_number}: {self.name}"
+
+
+
+class BoxLog(models.Model):
+    LOG_TYPE_CHOICES = [
+        ('new', 'New Box'),
+        ('change_area', 'Change of Area'),
+        ('doc_added', 'Document Added'),
+    ]
+    log_type = models.CharField(max_length=20, choices=LOG_TYPE_CHOICES)
+    box = models.ForeignKey("Box", on_delete=models.PROTECT, related_name="logs")
+    area_origin = models.ForeignKey("Area", on_delete=models.PROTECT, related_name="origin_logs")
+    area_destination = models.ForeignKey("Area", on_delete=models.PROTECT, related_name="destination_logs")
+    doc_added = models.ForeignKey("Documentation", on_delete=models.SET_NULL, null=True, blank=True, related_name="logs_added")  
+    doc_removed = models.ForeignKey("Documentation", on_delete=models.SET_NULL, null=True, blank=True, related_name="logs_removed")  
+    previous_status = models.CharField(max_length=50, null=False, blank=False)
+    new_status = models.CharField(max_length=50, null=False, blank=False)
+    observations = models.TextField(blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    user_area = models.ForeignKey("Area", on_delete=models.PROTECT, related_name="user_logs")
+    log_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Log for Box {self.box.id} - {self.previous_status} to {self.new_status}"

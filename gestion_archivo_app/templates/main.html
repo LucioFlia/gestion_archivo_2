@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Status{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Box 1 -->
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Box 1</h5>
+                    <p>Content for Box 1.</p>
+                </div>
+            </div>
+        </div>
+        <!-- Box 2 -->
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Box 2</h5>
+                    <p>Content for Box 2.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Existing open boxes in {{ user.area.name }}</h5>
+                </div>
+                <div class="card-body">
+    
+                    <!-- Search Field -->
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <input type="text" id="searchInputId" class="form-control" placeholder="Search boxes...">
+                            <button type="button" class="btn btn-secondary" onclick="clearSearch()">Clear</button>
+                        </div>
+                    </div>
+    
+                    <!-- Table -->
+                    <table class="table table-bordered table-striped mt-3" id="tableId">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable(0)">ID <i class="sort-indicator bi"></i></th>
+                                <th onclick="sortTable(1)">Name <i class="sort-indicator bi"></i></th>
+                                <th onclick="sortTable(2)">Area <i class="sort-indicator bi"></i></th>
+                                <th onclick="sortTable(3)">User <i class="sort-indicator bi"></i></th>
+                                <th onclick="sortTable(4)">Box Type <i class="sort-indicator bi"></i></th>
+                                <th onclick="sortTable(5)"># of sheets <i class="sort-indicator bi"></i></th>
+                                <th onclick="sortTable(6)">YoD<i class="sort-indicator bi"></i></th>
+                                <th onclick="sortTable(7)">Description <i class="sort-indicator bi"></i></th>
+                                <th onclick="sortTable(8)">Status <i class="sort-indicator bi"></i></th>
+                                <th onclick="sortTable(9)">Created At <i class="sort-indicator bi"></i></th>
+                                <th onclick="sortTable(10)">Updated At <i class="sort-indicator bi"></i></th>
+                                <th style="width: 120px;" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBodyId">
+                            {% for item in items %}
+                                <tr>
+                                    <td>{{ item.id }}</td>
+                                    <td>{{ item.name }}</td>
+                                    <td>{{ item.area.name }}</td>
+                                    <td>{{ item.user.username }}</td>
+                                    <td>{{ item.box_type.name }}</td>
+                                    <td>{{ item.total_sheets }}</td>
+                                    <td>{{ item.destruction_year }}</td>
+                                    <td>{{ item.description }}</td>
+                                    <td>{{ item.status }}</td>
+                                    <td>{{ item.creation_date|date:"d/m/y" }}</td>
+                                    <td>{{ item.update_date }}</td>
+                                    <td class="text-center">
+                                        {% if item.status == "open" %}
+                                            <a href="{% url 'edit_box_documentation' item.id %}" class="btn btn-sm btn-warning me-2">
+                                                <i class="bi bi-pencil-square"></i> &nbsp; Edit 
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+    
+                    <!-- Pagination Controls -->
+                    <nav class="mt-3">
+                        <ul class="pagination justify-content-center" id="tableBodyIdPagination">
+                            <!-- Pagination will be dynamically generated -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% load static %}
+<script src="{% static 'js/table_utils.js' %}?pagination_limit={{ pagination_limit }}"></script>
+{% endblock %}

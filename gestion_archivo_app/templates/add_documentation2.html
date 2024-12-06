@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Add Documentation{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="text-center mb-0">Add Documentation to Box: {{ box.name }}</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" class="mb-4">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="doc_number" class="form-label">Document Number</label>
+                    <input type="text" id="doc_number" name="doc_number" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea id="description" name="description" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="type_of_documentation" class="form-label">Type of Documentation</label>
+                    <div class="input-group">
+                        <select id="type_of_documentation" name="type_of_documentation" class="form-select" required>
+                            <option value="" disabled selected>Select Type</option>
+                            {% for doc_type in doc_types %}
+                                <option value="{{ doc_type.id }}">{{ doc_type.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createDocTypeModal">
+                            <i class="bi bi-plus-square"></i> Add New DocType
+                        </button>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="detail" class="form-label">Detail</label>
+                    <textarea id="detail" name="detail" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="corpus_number" class="form-label">Corpus Number</label>
+                    <input type="text" id="corpus_number" name="corpus_number" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="number_of_sheets" class="form-label">Number of Sheets</label>
+                    <input type="number" id="number_of_sheets" name="number_of_sheets" class="form-control" min="1" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Documentation</button>
+                <a href="{% url 'main' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Adding New DocType -->
+<div class="modal fade" id="createDocTypeModal" tabindex="-1" aria-labelledby="createDocTypeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createDocTypeModalLabel">Add New DocType</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'create_doctype_modal' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="doc_type_name" class="form-label">DocType Name</label>
+                        <input type="text" id="doc_type_name" name="name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="doc_type_detail" class="form-label">Detail</label>
+                        <textarea id="doc_type_detail" name="detail" class="form-control"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Save</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

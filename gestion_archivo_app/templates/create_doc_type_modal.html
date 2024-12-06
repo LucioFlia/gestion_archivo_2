@@ -1,0 +1,49 @@
+{% extends "base_modal.html" %}
+
+{% block title %}Create New Document Type{% endblock %}
+
+{% block content %}
+<div class="container">
+    <form id="createDocTypeForm" method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="name" class="form-label">Document Type Name</label>
+            <input type="text" id="name" name="name" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea id="description" name="description" class="form-control"></textarea>
+        </div>
+        <button type="submit" class="btn btn-success w-100">Create</button>
+        <div id="error-message" class="alert alert-danger d-none mt-3" role="alert"></div>
+    </form>
+</div>
+
+<script>
+    
+document.getElementById('createDocTypeForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const formData = new FormData(this);
+
+    fetch("{% url 'create_doc_type_modal' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": formData.get("csrfmiddlewaretoken"),
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Notificar al padre que se creó un nuevo tipo de caja
+            window.parent.addNewDocType(data.id, data.name);
+        } else {
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.textContent = data.error;
+            errorMessage.classList.remove('d-none');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+</script>
+{% endblock %}

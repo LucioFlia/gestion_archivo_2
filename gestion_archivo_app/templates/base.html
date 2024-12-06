@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Gestión de Archivo - {% block title %}{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <style>
+        html {
+            scroll-behavior:auto;
+        }
+    </style>
+
+
+</head>
+<body class="bg-light" a>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <!-- Site name -->
+            <a class="navbar-brand" href="{% url 'main' %}">Home</a>
+            
+            <!-- Toggle button for small screens -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Navbar content -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+
+                    <!-- Dropdown for "Create" menu -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="createDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Create
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="createDropdown">
+                            <li><a class="dropdown-item" href="{% url 'create_box_type' %}">Box Type</a></li>
+                            <li><a class="dropdown-item" href="{% url 'create_doc_type' %}">Document Type</a></li>
+                            <li><a class="dropdown-item" href="{% url 'create_box' %}">Create Box</a></li>
+                        </ul>
+                    </li>
+                
+                {% if user.is_authenticated and user.role == 'admin' %}
+               
+                    <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="createDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        System Configuration
+                    </a>
+
+                    <ul class="dropdown-menu" aria-labelledby="createDropdown">
+                        <li ><a class="dropdown-item" href="{% url 'config_keys_values' %}">Keys, Values</a></li>
+                        <li  ><a class="dropdown-item" href="/admin">Admin DB</a>  </li>
+                    </ul>
+
+                    </li>
+
+             
+                
+
+
+                 {% endif %}
+                </ul>
+            </div>
+                
+                <!-- User info and logout button -->
+                <div class="d-flex align-items-center">
+                    {% if user.is_authenticated %}
+                        <span class="text-white me-3">
+                            <strong>{{ user.username }}</strong> | {{ user.role }} | {{ user.area.name }}
+                        </span>
+                        <a href="{% url 'logout' %}" class="btn btn-danger btn-sm">Log Out</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-success btn-sm">Log In</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- Content -->
+
+    <div class="container-fluid py-4" style='margin-top:-20px' >
+        {% if messages %}
+        <div id="messages-container" class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3 mt-auto">
+        <p class="mb-0">&copy; 2024 Gestión de Archivo. Sección Informática - Dirección Regional Río Cuarto.</p>
+    </footer>
+    <script>
+        // Wait for the DOM to load
+        document.addEventListener("DOMContentLoaded", function () {
+            const messagesContainer = document.getElementById("messages-container");
+            if (messagesContainer) {
+                // Set a timeout to hide the messages after 5 seconds (5000 ms)
+                setTimeout(() => {
+                    messagesContainer.style.transition = "opacity 0.5s ease-out";
+                    messagesContainer.style.opacity = 0; // Gradual fade-out
+                    setTimeout(() => messagesContainer.remove(), 500); // Remove from DOM after fade-out
+                }, 5000); // Delay in milliseconds
+            }
+        });
+    </script>
+</body>
+</html>
