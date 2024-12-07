@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container-fluid mt-4">
     <div class="card shadow">
         <div class="card-header bg-primary text-white">
             <h4 class="text-center mb-0">Edit Documentation for Box: {{ box.name }}, Number of sheets {{ box.total_sheets }}</h4>
@@ -11,12 +11,17 @@
                 <div class="alert alert-danger">{{ error }}</div>
             {% endif %}
 
-    <!-- Botón para agregar documentación -->
-    <div class="d-flex justify-content-end mb-3">
+    <!-- Botones alineados a la izquierda -->
+    <div class="mb-3 d-flex gap-2">
+        <a href="{% url 'main' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left-circle"></i> Back
+        </a>        
         <a href="{% url 'add_documentation' box.id %}" class="btn btn-primary">
             <i class="bi bi-plus-circle"></i> Add Documentation
         </a>
+
     </div>
+
 
     <!-- Lista de documentaciones -->
     <div class="table-responsive">

@@ -3,6 +3,7 @@ from django.urls import path, include
 from gestion_archivo_app.views import main, create_box, create_box_type, create_doc_type, create_box_type_modal, config_keys_values, preview_box, save_and_generate_pdf, check_download_status
 from gestion_archivo_app.views import add_documentation, create_doc_type_modal, edit_box_documentation,edit_documentation, delete_documentation, login_view, logout_view
 from django.shortcuts import redirect
+from gestion_archivo_app.views import user_list, user_create, user_update, user_delete, user_import
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,9 +26,16 @@ urlpatterns = [
     path("box/<int:box_id>/edit-box_documentation/", edit_box_documentation, name="edit_box_documentation"),
     path("box/<int:box_id>/edit-documentation/<int:doc_id>/", edit_documentation, name="edit_documentation"),
     path("documentation/<int:doc_id>/delete/", delete_documentation, name="delete_documentation"),
+    path("users/", user_list, name="user_list"),
+    path("users/create/", user_create, name="user_create"),
+    path("users/update/<int:user_id>/", user_update, name="user_update"),
+    path("users/delete/<int:user_id>/", user_delete, name="user_delete"),
+    path("users/import/", user_import, name="user_import"),
+]
+
 
 
 
 
     
-    ]
+    

@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.template.loader import get_template
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
+import csv
 
 from .models import (
     Box,
@@ -25,6 +26,100 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 import pdfkit
 from django.contrib import messages
+
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib.auth.decorators import user_passes_test
+from .models import User, Area
+import csv
+from django.shortcuts import render, redirect
+from .models import User, Area
+
+
+def is_admin(user):
+    return user.role == 'admin'
+
+@user_passes_test(is_admin)
+def user_list(request):
+    users = User.objects.all()
+    return render(request, "user_list.html", {"users": users})
+
+@user_passes_test(is_admin)
+def user_create(request):
+    ROLE_CHOICES = User.ROLE_CHOICES  # Obtener las opciones de roles
+    areas = Area.objects.all()  # Obtener todas las áreas disponibles
+
+    if request.method == "POST":
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        role = request.POST.get("role")
+        area_id = request.POST.get("area")
+
+        if username and password and role:
+            area = Area.objects.get(id=area_id) if area_id else None
+            User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                role=role,
+                area=area
+            )
+            return redirect("user_list")
+
+    return render(request, "user_create.html", {"roles": ROLE_CHOICES, "areas": areas})
+
+
+@user_passes_test(is_admin)
+def user_update(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    areas = Area.objects.all()
+    ROLE_CHOICES = User.ROLE_CHOICES  # Obtener los roles disponibles
+
+    if request.method == "POST":
+        user.username = request.POST.get("username", user.username)
+        user.email = request.POST.get("email", user.email)
+        user.role = request.POST.get("role", user.role)
+        area_id = request.POST.get("area")
+        user.area = Area.objects.get(id=area_id) if area_id else None
+        password = request.POST.get("password")
+        if password:
+            user.set_password(password)
+        user.save()
+        return redirect("user_list")
+
+    return render(request, "user_update.html", {"user": user, "areas": areas, "roles": ROLE_CHOICES})
+
+    return render(request, "user_update.html", {"user": user, "areas": areas})
+
+@user_passes_test(is_admin)
+def user_delete(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    if request.method == "POST":
+        user.delete()
+        return redirect("user_list")
+    return render(request, "user_delete.html", {"user": user})
+
+@user_passes_test(is_admin)
+def user_import(request):
+    if request.method == "POST":
+        csv_file = request.FILES.get("csv_file")
+        if csv_file:
+            decoded_file = csv_file.read().decode("utf-8").splitlines()
+            reader = csv.DictReader(decoded_file)
+            for row in reader:
+                area = Area.objects.get(id=row["area_id"]) if row.get("area_id") else None
+                User.objects.create_user(
+                    username=row["username"],
+                    email=row["email"],
+                    password=row["password"],
+                    role=row["role"],
+                    area=area
+                )
+            return redirect("user_list")
+    return render(request, "user_import.html")
+
+
+
 
 def login_view(request):
     if request.method == "POST":

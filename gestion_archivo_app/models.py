@@ -6,7 +6,7 @@ from datetime import datetime
 
 class User(AbstractUser):
     ROLE_CHOICES = [
-        ('normal', 'Normal'),
+        ('user', 'User'),
         ('manager', 'Manager'),
         ('archive_responsible', 'Archive Responsible'),
         ('admin', 'System Administrator')
@@ -19,8 +19,9 @@ class User(AbstractUser):
     
 
 class Area(models.Model):
-    name = models.CharField(max_length=100, unique=True, verbose_name="Nombre del Área")
-    description = models.TextField(blank=True, null=True, verbose_name="Descripción")
+    code = models.CharField(max_length=30, unique=True, verbose_name="Area Code")
+    name = models.CharField(max_length=100, unique=True, verbose_name="Area Name")
+    description = models.TextField(blank=True, null=True, verbose_name="Description")
 
     def __str__(self):
         return self.name
