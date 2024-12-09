@@ -38,13 +38,17 @@ class Box(models.Model):
     STATUS_CHOICES = [
         ('open', 'Open'),
         ('closed', 'Closed'),
+        ('waiting_close', 'Waiting for Close'),
+        ('waiting_archive', 'Waiting for Archive')
+ 
+    
     ]
     name = models.CharField(max_length = 10, primary_key=False, verbose_name="Box Name", null=False, blank=False, unique=True)  
     box_type = models.ForeignKey(BoxType, on_delete=models.PROTECT, related_name="boxes")
     description = models.TextField(blank=True, null=True, verbose_name="Box Description")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="boxes")
     area = models.ForeignKey(Area, on_delete=models.PROTECT, related_name="boxes")
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='open')
+    status = models.CharField(max_length=32, choices=STATUS_CHOICES, default='open')
     id = models.AutoField(primary_key=True, verbose_name="Box ID")  # Auto-incremental ID
     creation_date = models.DateTimeField(auto_now_add=True, verbose_name="Creation Date")
     update_date =  models.DateTimeField(auto_now=True)
@@ -56,7 +60,6 @@ class Box(models.Model):
         verbose_name="Destruction Year"
     )
     current_area = models.ForeignKey(Area, on_delete=models.PROTECT, related_name="current_boxes", verbose_name="Current Area")
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='open', verbose_name="Status")
     total_sheets = models.PositiveIntegerField(default=0)  
 
     def update_total_sheets(self):
@@ -75,6 +78,19 @@ class Box(models.Model):
         self.status = 'closed'
         self.close_date = models.DateTimeField(auto_now_add=True)
         self.save()
+    
+    def save(self, *args, **kwargs):
+        if not self.name:
+            # Obtener el último número utilizado
+            last_box = Box.objects.order_by('-id').first()
+            if last_box and last_box.name.isdigit():
+                new_number = int(last_box.name) + 1
+            else:
+                new_number = 1
+
+            self.name = f"{new_number:05d}"
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Box ({self.box_type.name}) - {self.status}"

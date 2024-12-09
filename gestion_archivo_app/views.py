@@ -34,9 +34,71 @@ import csv
 from django.shortcuts import render, redirect
 from .models import User, Area
 
+from django.shortcuts import get_object_or_404, redirect, render
+from .models import Area
+from django.contrib.auth.decorators import login_required, user_passes_test
+import csv
+from django.shortcuts import redirect, render
+from django.contrib.auth.decorators import login_required, user_passes_test
+from .models import Area
 
 def is_admin(user):
     return user.role == 'admin'
+
+@login_required
+@user_passes_test(is_admin)
+def area_import(request):
+    if request.method == "POST":
+        csv_file = request.FILES.get("csv_file")
+        if csv_file:
+            decoded_file = csv_file.read().decode("utf-8").splitlines()
+            reader = csv.DictReader(decoded_file)
+            for row in reader:
+                name = row.get("name")
+                code = row.get("code")
+                if name and code:
+                    if not Area.objects.filter(code=code).exists():
+                        Area.objects.create(name=name, code=code)
+            return redirect("area_list")
+    return render(request, "area_import.html")
+
+
+@login_required
+@user_passes_test(is_admin)
+def area_list(request):
+    areas = Area.objects.all()
+    return render(request, "area_list.html", {"areas": areas})
+
+@login_required
+@user_passes_test(is_admin)
+def area_create(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        code = request.POST.get("code")
+        if name and code:
+            Area.objects.create(name=name, code=code)
+            return redirect("area_list")
+    return render(request, "area_create.html")
+
+@login_required
+@user_passes_test(is_admin)
+def area_update(request, area_id):
+    area = get_object_or_404(Area, id=area_id)
+    if request.method == "POST":
+        area.name = request.POST.get("name", area.name)
+        area.code = request.POST.get("code", area.code)
+        area.save()
+        return redirect("area_list")
+    return render(request, "area_update.html", {"area": area})
+
+@login_required
+@user_passes_test(is_admin)
+def area_delete(request, area_id):
+    area = get_object_or_404(Area, id=area_id)
+    if request.method == "POST":
+        area.delete()
+        return redirect("area_list")
+    return render(request, "area_delete.html", {"area": area})
 
 @user_passes_test(is_admin)
 def user_list(request):
@@ -479,4 +541,26 @@ def delete_documentation(request, doc_id):
     return redirect("edit_box_documentation", box_id=box.id)
 
 
-    
+@login_required
+def request_close_box(request, box_id):
+    box = get_object_or_404(Box, id=box_id)
+    if box.status == 'open':
+        box.status = 'waiting_for_close'
+        box.save()
+    return redirect('main')
+
+@login_required
+def approve_close_box(request, box_id):
+    box = get_object_or_404(Box, id=box_id)
+    if box.status == 'waiting_for_close' and request.user.role == 'manager':
+        box.status = 'closed'
+        box.save()
+    return redirect('main')
+
+@login_required
+def send_box_to_archive(request, box_id):
+    box = get_object_or_404(Box, id=box_id)
+    if box.status == 'closed' and request.user.role == 'manager':
+        box.status = 'waiting_archive'
+        box.save()
+    return redirect('main')

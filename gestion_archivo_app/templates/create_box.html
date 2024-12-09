@@ -12,8 +12,11 @@
             <form method="post" class="mb-4" action="{% url 'preview_box' %} ">
                 {% csrf_token %}
                 <div class="mb-3">
-                    <label for="box_name" class="form-label">Box Name</label>
-                    <input type="text" id="box_name" name="box_name" class="form-control" required>
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" id="name" class="form-control" placeholder="Pending generation" disabled>
+                    <small class="form-text text-muted">
+                        The box name will be generated automatically upon saving.
+                    </small>
                 </div>
                 <div class="mb-3">
                     <label for="description" class="form-label">Description</label>

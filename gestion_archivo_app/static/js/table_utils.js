@@ -89,8 +89,32 @@ const scriptSrc = currentScript.src;
 const urlParams = new URL(scriptSrc).searchParams;
 const rowsPerPage = +urlParams.get('pagination_limit');
 
+function checkTableRecords() {
 
+    const tableBody = document.getElementById('tableBodyId');
+    const noRecordsMessage = document.getElementById('noRecordsMessage');
+    const pagination = document.getElementById('tableBodyIdPagination');
+    
+
+    if (tableBody.children.length === 0) {
+        // Mostrar el mensaje "No hay registros" y ocultar la paginación
+        noRecordsMessage.style.display = 'block';
+        pagination.style.display = 'none';
+    } else {
+        // Ocultar el mensaje y mostrar la paginación
+        noRecordsMessage.style.display = 'none';
+        pagination.style.display = 'flex';
+    }
+}
+
+
+// Llamar a la función después de cargar los datos en la tabla
+if (document.getElementById('noRecordsMessage')){
+document.addEventListener('DOMContentLoaded', checkTableRecords);
+}
+if (document.getElementById('noRecordsMessage')){
 document.addEventListener("DOMContentLoaded", function() {
+    
     searchInputId = "searchInputId"
     tableBodyId = "tableBodyId";
     table = document.getElementById('tableId');
@@ -107,11 +131,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
     table.addEventListener("click", function (event) {
-        
-       
-
-        // Perform the sorting logic if needed (not included here)
+  
+      
     });
 
 });
+}
 

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Area Management</h2>
+    <div class="mb-3">
+        <a href="{% url 'area_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add Area
+        </a>
+        <a href="{% url 'area_import' %}" class="btn btn-secondary">
+            <i class="bi bi-upload"></i> Import Areas
+        </a>
+    </div>
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-light">
+            <tr>
+                <th>Name</th>
+                <th>Code</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for area in areas %}
+                <tr>
+                    <td>{{ area.name }}</td>
+                    <td>{{ area.code }}</td>
+                    <td class="text-center">
+                        <a href="{% url 'area_update' area.id %}" class="btn btn-sm btn-warning">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </a>
+                        <a href="{% url 'area_delete' area.id %}" class="btn btn-sm btn-danger">
+                            <i class="bi bi-trash-fill"></i> Delete
+                        </a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center">No areas available.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,7 @@
+{
+    "python.languageServer": "Pylance",
+    "python.linting.pylintEnabled": true,
+    "python.defaultLinter": "pylint",
+    "python.formatting.blackEnabled": true,
+    "editor.formatOnSave": true
+}
