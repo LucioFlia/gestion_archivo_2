@@ -4,13 +4,13 @@ from gestion_archivo_app.views import main, create_box, create_box_type, create_
 from gestion_archivo_app.views import add_documentation, create_doc_type_modal, edit_box_documentation,edit_documentation, delete_documentation, login_view, logout_view
 from django.shortcuts import redirect
 from gestion_archivo_app.views import user_list, user_create, user_update, user_delete, user_import
-from gestion_archivo_app.views import area_list, area_create, area_update, area_delete, area_import, request_close_box, approve_close_box, send_box_to_archive
+from gestion_archivo_app.views import area_list, area_create, area_update, area_delete, area_import, request_close_box, approve_close_box, send_box_to_archive, box_logs
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', login_view, name='login'),
-     path('logout/', logout_view, name='logout'),
+    path('logout/', logout_view, name='logout'),
 
     path('main/', main, name='main'),
     path('', lambda request: redirect('main', permanent=False)),
@@ -40,6 +40,8 @@ urlpatterns = [
     path("box/<int:box_id>/request-close/", request_close_box, name="request_close_box"),
     path("box/<int:box_id>/approve-close/", approve_close_box, name="approve_close_box"),
     path("box/<int:box_id>/send-to-archive/", send_box_to_archive, name="send_box_to_archive"),
+    path('box/<int:box_id>/logs/', box_logs, name='box_logs'),
+
 ]
 
 

@@ -356,8 +356,14 @@ def config_keys_values(request):
 
 @login_required
 def main(request):
+    if request.user.role == 'admin':
+        items = Box.objects.all().order_by('-name')
+    else:
+        user_area = request.user.area
+        items = Box.objects.filter(area=user_area).order_by('-name')
     # Filter open boxes
-    items = Box.objects.filter(status="open").order_by('-name')
+    user_area = request.user.area
+    
     return render(request, "main.html", {"items": items})
 
 # Variable global para indicar si la descarga está lista (podría usarse una solución más robusta como un cache)
@@ -445,6 +451,17 @@ def add_documentation(request, box_id):
             box=box
         )
         documentation.save()
+               # Registrar en BoxLog
+        BoxLog.objects.create(
+            log_type='doc_added',
+            box=box,
+            doc_added=documentation,
+            previous_status=box.status,
+            new_status=box.status,
+            observations=f"Document '{name}' of {sheets} added.",
+            user=request.user,
+            user_area=request.user.area
+        )
         box.update_total_sheets()  # Actualizar el total de hojas
         if "save_and_continue" in request.POST:
             return redirect("add_documentation", box_id=box.id)
@@ -535,6 +552,17 @@ def delete_documentation(request, doc_id):
 
     # Eliminar la documentación
     documentation.delete()
+        # Registrar en BoxLog
+    BoxLog.objects.create(
+        log_type='doc_removed',
+        box=box,
+        doc_removed=documentation,
+        previous_status=box.status,
+        new_status=box.status,
+        observations=f"Document '{documentation.name}' removed.",
+        user=request.user,
+        user_area=request.user.area
+    )
     box.update_total_sheets()  # Actualizar el total de hojas en la caja
 
     # Redirigir de nuevo a la vista de edición de documentaciones
@@ -564,3 +592,13 @@ def send_box_to_archive(request, box_id):
         box.status = 'waiting_archive'
         box.save()
     return redirect('main')
+
+def box_logs(request, box_id):
+    box = get_object_or_404(Box, id=box_id)
+    logs = BoxLog.objects.filter(box=box).order_by('-log_date')
+
+    context = {
+        'box': box,
+        'logs': logs,
+    }
+    return render(request, 'box_logs.html', context)

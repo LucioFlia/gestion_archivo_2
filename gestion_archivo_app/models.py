@@ -148,8 +148,8 @@ class BoxLog(models.Model):
     ]
     log_type = models.CharField(max_length=20, choices=LOG_TYPE_CHOICES)
     box = models.ForeignKey("Box", on_delete=models.PROTECT, related_name="logs")
-    area_origin = models.ForeignKey("Area", on_delete=models.PROTECT, related_name="origin_logs")
-    area_destination = models.ForeignKey("Area", on_delete=models.PROTECT, related_name="destination_logs")
+    area_origin = models.ForeignKey("Area", on_delete=models.PROTECT, null=True, blank=True, related_name="origin_logs")
+    area_destination = models.ForeignKey("Area", on_delete=models.PROTECT, null=True, blank=True, related_name="destination_logs")
     doc_added = models.ForeignKey("Documentation", on_delete=models.SET_NULL, null=True, blank=True, related_name="logs_added")  
     doc_removed = models.ForeignKey("Documentation", on_delete=models.SET_NULL, null=True, blank=True, related_name="logs_removed")  
     previous_status = models.CharField(max_length=50, null=False, blank=False)
@@ -161,3 +161,20 @@ class BoxLog(models.Model):
 
     def __str__(self):
         return f"Log for Box {self.box.id} - {self.previous_status} to {self.new_status}"
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from .models import Box, BoxLog
+
+@receiver(post_save, sender=Box)
+def create_box_log(sender, instance, created, **kwargs):
+    if created:
+        BoxLog.objects.create(
+            log_type='new',
+            box=instance,
+            previous_status='N/A',
+            new_status=instance.status,
+            observations='Box created',
+            user=instance.user,
+            user_area=instance.user.area
+        )
