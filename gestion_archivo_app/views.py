@@ -474,18 +474,18 @@ def add_documentation(request, box_id):
             box=box
         )
         documentation.save()
-               # Registrar en BoxLog
         BoxLog.objects.create(
             log_type='doc_added',
             box=box,
             doc_added=documentation,
             previous_status=box.status,
             new_status=box.status,
-            observations=f"Document '{name}' of {sheets} added.",
+            observations=f"Document '{name}' of {sheets} sheets added.",
             user=request.user,
             user_area=request.user.area
         )
         box.update_total_sheets()  # Actualizar el total de hojas
+        messages.success(request, "The documantation was added.")
         if "save_and_continue" in request.POST:
             return redirect("add_documentation", box_id=box.id)
         elif "save_and_exit" in request.POST:
@@ -498,9 +498,6 @@ def add_documentation(request, box_id):
         "documentations": documentations,
     })
    
-
-
-
 def create_doctype_modal(request):
     if request.method == "POST":
         name = request.POST.get("name")
@@ -549,7 +546,19 @@ def edit_documentation(request, box_id, doc_id):
             documentation.sheets = int(sheets)
             documentation.description = description
             documentation.save()
-            box.update_total_sheets()  # Actualizar el total de hojas
+            box.update_total_sheets()  
+            #log
+            BoxLog.objects.create(
+            log_type='doc_edited',
+            box=box,
+            doc_added=documentation,
+            previous_status=box.status,
+            new_status=box.status,
+            observations=f"Document '{name}' of {sheets} sheets edited.",
+            user=request.user,
+            user_area=request.user.area
+            )
+            messages.success(request, "The documentation was updated.")
             return redirect("edit_box_documentation", box_id=box.id)
     else:
         # Datos iniciales para el formulario
@@ -571,10 +580,10 @@ def delete_documentation(request, doc_id):
     View to delete a specific documentation.
     """
     documentation = get_object_or_404(Documentation, id=doc_id)
-    box = documentation.box  # Guardar referencia a la caja antes de eliminar
-
+    box = documentation.box  
+    documentation.box = None
     # Eliminar la documentación
-    documentation.delete()
+    documentation.save()
         # Registrar en BoxLog
     BoxLog.objects.create(
         log_type='doc_removed',
@@ -582,7 +591,7 @@ def delete_documentation(request, doc_id):
         doc_removed=documentation,
         previous_status=box.status,
         new_status=box.status,
-        observations=f"Document '{documentation.name}' removed.",
+        observations=f"Document '{documentation.name}' unlinked from box.",
         user=request.user,
         user_area=request.user.area
     )
@@ -598,6 +607,16 @@ def request_close_box(request, box_id):
     if box.status == 'open':
         box.status = 'waiting_for_close'
         box.save()
+        # Registrar en BoxLog
+        BoxLog.objects.create(
+        log_type='status_change',
+        box=box,
+        previous_status=box.status,
+        new_status=box.status,
+        observations='Close request submitted.',
+        user=request.user,
+        user_area=request.user.area
+    )
     return redirect('main')
 
 @login_required
@@ -606,6 +625,15 @@ def approve_close_box(request, box_id):
     if box.status == 'waiting_for_close' and request.user.role == 'manager':
         box.status = 'closed'
         box.save()
+        BoxLog.objects.create(
+        log_type='status_change',
+        box=box,
+        previous_status=box.status,
+        new_status=box.status,
+        observations='Box closure approved.',
+        user=request.user,
+        user_area=request.user.area
+    )
     return redirect('main')
 
 @login_required

@@ -39,7 +39,10 @@ class Box(models.Model):
         ('open', 'Open'),
         ('closed', 'Closed'),
         ('waiting_close', 'Waiting for Close'),
-        ('waiting_archive', 'Waiting for Archive')
+        ('waiting_archive', 'Waiting for Archive'),
+        ('accepted_archive', 'Accepted by Archive Responsible'),
+        ('archived', 'In Archive'),
+
  
     
     ]
@@ -113,9 +116,9 @@ class Documentation(models.Model):
     description = models.TextField(blank=True, null=True, verbose_name="Document Description")
     corpus = models.TextField(null=False, blank=False)  # Required
     sheets = models.PositiveIntegerField(null=False, blank=False)  # Required
-    created_by = models.ForeignKey(User, on_delete=models.PROTECT)  # Creator
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT)  # Creators
     creation_date = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
-    box = models.ForeignKey(Box, on_delete=models.CASCADE, related_name="documentations")  # Relation to Box
+    box = models.ForeignKey(Box, on_delete=models.SET_NULL, null= True, blank = True, related_name="documentations")  # Relation to Box
 
     def __str__(self):
         return f"{self.name} (Box: {self.box.name})"
@@ -145,6 +148,10 @@ class BoxLog(models.Model):
         ('new', 'New Box'),
         ('change_area', 'Change of Area'),
         ('doc_added', 'Document Added'),
+        ('doc_removed', 'Document Removed'),
+        ('doc_edited', 'Document Edited'),
+        ('status_change', "Status Changed"),
+        ('area_change', 'Area Changed'),
     ]
     log_type = models.CharField(max_length=20, choices=LOG_TYPE_CHOICES)
     box = models.ForeignKey("Box", on_delete=models.PROTECT, related_name="logs")
