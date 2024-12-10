@@ -41,9 +41,15 @@ import csv
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Area
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import SystemConfigKeyValues
+from django.contrib import messages
 
 def is_admin(user):
     return user.role == 'admin'
+
+def is_user_or_manager(user):
+    return user.role in ['user', 'manager']
 
 @login_required
 @user_passes_test(is_admin)
@@ -150,8 +156,7 @@ def user_update(request, user_id):
         return redirect("user_list")
 
     return render(request, "user_update.html", {"user": user, "areas": areas, "roles": ROLE_CHOICES})
-
-    return render(request, "user_update.html", {"user": user, "areas": areas})
+#return render(request, "user_update.html", {"user": user, "areas": areas})
 
 @user_passes_test(is_admin)
 def user_delete(request, user_id):
@@ -329,30 +334,48 @@ def preview_box(request):
 
 
 
+
+
+
+
 @login_required
 def config_keys_values(request):
-    if request.user.role != 'admin':  # Verificar si el rol es admin
-        raise PermissionDenied("You do not have access to this page.")
-    if request.method == "POST":
-        key = request.POST.get("key")
-        value = request.POST.get("value")
-        description = request.POST.get("description")
-
-        # Validar si la clave ya existe
-        if SystemConfigKeyValues.objects.filter(key=key).exists():
-            configs = SystemConfigKeyValues.objects.all()
-            return render(request, "config_keys_values.html", {
-                "configs": configs,
-                "error": "The key already exists."
-            })
-
-        # Crear o actualizar la configuración
-        SystemConfigKeyValues.objects.create(key=key, value=value, description=description)
-        return redirect("config_keys_values")
-
-    # Mostrar todas las configuraciones
     configs = SystemConfigKeyValues.objects.all()
-    return render(request, "config_keys_values.html", {"configs": configs})
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+
+        # Guardar o editar una clave
+        if action == "save":
+            config_id = request.POST.get("config_id")
+            key = request.POST.get("key")
+            value = request.POST.get("value")
+            description = request.POST.get("description")
+
+            if config_id:
+                # Editar clave existente
+                config = get_object_or_404(SystemConfigKeyValues, id=config_id)
+                config.key = key
+                config.value = value
+                config.description = description
+                config.save()
+                messages.success(request, "Key updated successfully.")
+            else:
+                # Crear nueva clave
+                SystemConfigKeyValues.objects.create(key=key, value=value, description=description)
+                messages.success(request, "Key added successfully.")
+
+        # Eliminar una clave
+        elif action == "delete":
+            config_id = request.POST.get("config_id")
+            config = get_object_or_404(SystemConfigKeyValues, id=config_id)
+            config.delete()
+            messages.success(request, "Key deleted successfully.")
+
+        return redirect('config_keys_values')
+
+    return render(request, 'config_keys_values.html', {'configs': configs})
+
 
 @login_required
 def main(request):
