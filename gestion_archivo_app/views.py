@@ -642,6 +642,15 @@ def send_box_to_archive(request, box_id):
     if box.status == 'closed' and request.user.role == 'manager':
         box.status = 'waiting_archive'
         box.save()
+        BoxLog.objects.create(
+            log_type='status_change',
+            box=box,
+            previous_status=box.status,
+            new_status=box.status,
+            observations='Box sent to archive.',
+            user=request.user,
+            user_area=request.user.area
+    )
     return redirect('main')
 
 def box_logs(request, box_id):

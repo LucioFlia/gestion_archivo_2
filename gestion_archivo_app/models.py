@@ -4,6 +4,20 @@ from django.conf import settings
 from django.db import models
 from datetime import datetime
 
+class SystemConfigKeyValues(models.Model):
+    key = models.CharField(max_length=100, unique=True)
+    value = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.key}: {self.value}"
+
+def get_system_config_value(key, default=None):
+    try:
+        return SystemConfigKeyValues.objects.get(key=key).value
+    except SystemConfigKeyValues.DoesNotExist:
+        return default
+
 class User(AbstractUser):
     ROLE_CHOICES = [
         ('user', 'User'),
@@ -12,7 +26,8 @@ class User(AbstractUser):
         ('admin', 'System Administrator')
     ]
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
-    area = models.ForeignKey('Area', on_delete=models.SET_NULL, null=True, blank=True)
+    area = models.ForeignKey('Area', on_delete=models.PROTECT,blank=True, null=True,  verbose_name="User Area")
+    deposit = models.ForeignKey('Area', on_delete=models.PROTECT,blank=True, null=True,  verbose_name="Archive", related_name='deposits')
 
     def __str__(self):
         return self.username
@@ -21,6 +36,7 @@ class User(AbstractUser):
 class Area(models.Model):
     code = models.CharField(max_length=30, unique=True, verbose_name="Area Code")
     name = models.CharField(max_length=100, unique=True, verbose_name="Area Name")
+
     description = models.TextField(blank=True, null=True, verbose_name="Description")
 
     def __str__(self):
@@ -123,13 +139,7 @@ class Documentation(models.Model):
     def __str__(self):
         return f"{self.name} (Box: {self.box.name})"
 
-class SystemConfigKeyValues(models.Model):
-    key = models.CharField(max_length=100, unique=True)
-    value = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True)
 
-    def __str__(self):
-        return f"{self.key}: {self.value}"
     
 
 
