@@ -107,11 +107,12 @@ class Box(models.Model):
     current_year = datetime.now().year
 
     destruction_year = models.PositiveSmallIntegerField(
-        choices=[(year, str(year)) for year in range(current_year, 2100)],
+        choices=[(0,'Never')] + [(year, str(year)) for year in range(current_year, current_year + 500)],
         verbose_name="Destruction Year"
     )
     current_area = models.ForeignKey(Area, on_delete=models.PROTECT, related_name="current_boxes", verbose_name="Current Area")
     total_sheets = models.PositiveIntegerField(default=0)  
+    print (destruction_year.choices)
 
     def update_total_sheets(self):
         """

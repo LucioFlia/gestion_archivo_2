@@ -1,6 +1,9 @@
+import csv
+from datetime import datetime
+
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse, JsonResponse
 from django.core.paginator import Paginator
 from django.core.exceptions import PermissionDenied
@@ -8,7 +11,12 @@ from django.urls import reverse
 from django.template.loader import get_template
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-import csv
+from django.contrib import messages
+from django.http import HttpResponseForbidden
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from functools import wraps
+import pdfkit
 
 from .models import (
     Box,
@@ -19,31 +27,25 @@ from .models import (
     Area,
     SystemConfigKeyValues,
     Universe,
+    User,
 )
 
-from datetime import datetime
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-import pdfkit
+from functools import wraps
 from django.contrib import messages
+from django.shortcuts import redirect
 
-from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib.auth.decorators import user_passes_test
-from .models import User, Area
-import csv
-from django.shortcuts import render, redirect
-from .models import User, Area
+def user_passes_test_with_message(test_func, message="You do not have permission to access this page."):
+    def decorator(view_func):
+        @wraps(view_func)
+        def _wrapped_view(request, *args, **kwargs):
+            if test_func(request.user):
+                return view_func(request, *args, **kwargs)
+            messages.error(request, message)
+            # Redirige a la misma página para mostrar el mensaje en `base.html`
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+        return _wrapped_view
+    return decorator
 
-from django.shortcuts import get_object_or_404, redirect, render
-from .models import Area
-from django.contrib.auth.decorators import login_required, user_passes_test
-import csv
-from django.shortcuts import redirect, render
-from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import Area
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import SystemConfigKeyValues
-from django.contrib import messages
 
 def is_admin(user):
     return user.role == 'admin'
@@ -51,17 +53,8 @@ def is_admin(user):
 def is_user_or_manager(user):
     return user.role in ['user', 'manager']
 
-import csv
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib import messages
-from .models import Area
-
-def is_admin(user):
-    return user.role == 'admin'
-
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test_with_message(is_admin, "Only the admin can access this page.")
 def area_import(request):
     if request.method == "POST":
         csv_file = request.FILES.get("csv_file")
@@ -94,14 +87,14 @@ def area_import(request):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test_with_message(is_admin, "Only the admin can access this page.")
 def area_list(request):
     areas = Area.objects.all()
     return render(request, "area_list.html", {"areas": areas})
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test_with_message(is_admin, "Only the admin can access this page.")
 def area_create(request):
     if request.method == "POST":
         name = request.POST.get("name")
@@ -118,7 +111,7 @@ def area_create(request):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test_with_message(is_admin, "Only the admin can access this page.")
 def area_update(request, area_id):
     area = get_object_or_404(Area, id=area_id)
 
@@ -133,7 +126,7 @@ def area_update(request, area_id):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test_with_message(is_admin, "Only the admin can access this page.")
 def area_delete(request, area_id):
     area = get_object_or_404(Area, id=area_id)
     if request.method == "POST":
@@ -142,13 +135,13 @@ def area_delete(request, area_id):
     return render(request, "area_delete.html", {"area": area})
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test_with_message(is_admin, "Only the admin can access this page.")
 def user_list(request):
     users = User.objects.all()
     return render(request, "user_list.html", {"users": users})
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test_with_message(is_admin, "Only the admin can access this page.")
 def user_create(request):
     ROLE_CHOICES = User.ROLE_CHOICES
     areas = Area.objects.all()
@@ -177,7 +170,7 @@ def user_create(request):
 
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test_with_message(is_admin, "Only the admin can access this page.")
 def user_update(request, user_id):
     user = get_object_or_404(User, id=user_id)
     areas = Area.objects.all()
@@ -203,7 +196,7 @@ def user_update(request, user_id):
 
 #return render(request, "user_update.html", {"user": user, "areas": areas})
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test_with_message(is_admin, "Only the admin can access this page.")
 def user_delete(request, user_id):
     user = get_object_or_404(User, id=user_id)
     if request.method == "POST":
@@ -212,7 +205,7 @@ def user_delete(request, user_id):
     return render(request, "user_delete.html", {"user": user})
 
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test_with_message(is_admin, "Only the admin can access this page.")
 def user_import(request):
     if request.method == "POST":
         csv_file = request.FILES.get("csv_file")
@@ -256,7 +249,7 @@ def error_403(request, exception):
 
 def logout_view(request):
     logout(request)
-    return redirect('login')  # Cambia 'login' por el nombre de tu vista de inicio de sesión
+    return redirect('login') 
 
 
 
@@ -354,11 +347,12 @@ def create_doc_type(request):
     return render(request, 'create_doc_type.html', context)
 
 @login_required
+@user_passes_test_with_message(is_user_or_manager, message="Only users and managers can access this page.")
 def create_box(request):
     user_area = request.user.area
     box_types = BoxType.objects.all()  # Retrieve all available box types
     current_year = datetime.now().year
-    destruction_years = list(range(current_year, 2100))
+    destruction_years = [(0,'Never')] + [(year, str(year)) for year in range(current_year, current_year + 25)]
     suggested_year = current_year + 5
     boxes = Box.objects.filter(current_area=user_area, status='open').order_by('-creation_date') 
     return render(request, 'create_box.html', {'box_types': box_types, 
@@ -375,7 +369,10 @@ def preview_box(request):
         # Captura todos los datos enviados desde el formulario
         box_data = request.POST.dict()  # Convierte los datos POST a un diccionario
         box_fields = {k: v for k, v in box_data.items() if not k.startswith("_")}
-        return render(request, "preview_box.html", {"box_fields": box_fields})
+        user = request.user
+        area = getattr(user, 'area', None) 
+        print (box_fields, user, area)
+        return render(request, "preview_box.html", {"box_fields": box_fields, "user": user, "area": area})
     return redirect("create_box")
 
 

@@ -39,8 +39,8 @@
                 <div class="mb-3">
                     <label for="destruction_year" class="form-label">Destruction Year</label>
                     <select id="destruction_year" name="destruction_year" class="form-select" required>
-                        {% for year in destruction_years %}
-                            <option value="{{ year }}" {% if year == suggested_year %}selected{% endif %}>{{ year }}</option>
+                        {% for year, value in destruction_years %}
+                            <option value="{{ year }}" {% if year == suggested_year %}selected{% endif %}>{{ value }}</option>
                         {% endfor %}
                     </select>
                 </div>

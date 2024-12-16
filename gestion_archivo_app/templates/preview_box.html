@@ -27,7 +27,7 @@
                 {% csrf_token %}
                 <!-- Reenvía todos los datos como campos ocultos -->
                 {% for field, value in box_fields.items %}
-                <input type="hidden" name="{{ field }}" value="{{ value }}">
+                <input type="text" name="{{ field }}" value="{{ value }}">
                 {% endfor %}
                 <button class="btn btn-primary " type="submit" onclick="redirectAfterDownload()">Save & Download PDF <i class="bi-arrow-right-circle"></i></button>
             </form>
