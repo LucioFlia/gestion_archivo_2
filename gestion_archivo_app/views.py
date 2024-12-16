@@ -370,9 +370,12 @@ def preview_box(request):
         box_data = request.POST.dict()  # Convierte los datos POST a un diccionario
         box_fields = {k: v for k, v in box_data.items() if not k.startswith("_")}
         user = request.user
+        full_name = f"{user.first_name} {user.last_name}".strip()
+
         area = getattr(user, 'area', None) 
         print (box_fields, user, area)
-        return render(request, "preview_box.html", {"box_fields": box_fields, "user": user, "area": area})
+        return render(request, "preview_box.html", 
+                      {"box_fields": box_fields, "full_name": full_name, "area": area})
     return redirect("create_box")
 
 

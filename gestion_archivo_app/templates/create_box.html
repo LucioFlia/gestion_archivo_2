@@ -26,7 +26,8 @@
                 <label for="box_type" class="form-label">Box Type</label>
                 <div class="input-group">
                     
-                    <select id="box_type" name="box_type" class="form-select">
+                    <select id="box_type" name="box_type" class="form-select" required>
+                        <option value="" disabled selected>Select...</option>
                         {% for box_type in box_types %}
                             <option value="{{ box_type.id }}">{{ box_type.name }}</option>
                         {% endfor %}
