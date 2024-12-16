@@ -1,21 +1,51 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+
+{% block title %}Import Areas{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">Import Areas from CSV</h2>
-    <form method="post" enctype="multipart/form-data">
+<div class="container mt-5">
+    <h2 class="mb-4">Import Areas</h2>
+
+    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
         {% csrf_token %}
+        
         <div class="mb-3">
-            <label for="csv_file" class="form-label">CSV File</label>
-            <input type="file" name="csv_file" id="csv_file" class="form-control" required>
+            <label for="csv_file" class="form-label">Upload CSV File</label>
+            <input type="file" name="csv_file" class="form-control" accept=".csv" required>
+            <div class="invalid-feedback">Please upload a CSV file.</div>
         </div>
+
         <button type="submit" class="btn btn-primary">
-            <i class="bi bi-upload"></i> Import
+            <i class="bi bi-upload"></i> Import Areas
         </button>
-        <a href="{% url 'area_list' %}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left-circle"></i> Cancel
+        <a href="{% url 'area_list' %}" class="btn btn-secondary ms-2">
+            <i class="bi bi-arrow-left"></i> Back to List
         </a>
     </form>
-</div>
-{% endblock %}
 
+    {% if messages %}
+        <div class="mt-4">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<!-- Bootstrap Form Validation Script -->
+<script>
+    (function () {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+{% endblock %}

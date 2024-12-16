@@ -1,24 +1,53 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+
+{% block title %}Update Area{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">Edit Area: {{ area.name }}</h2>
-    <form method="post">
+<div class="container mt-5">
+    <h2 class="mb-4">Update Area</h2>
+    <form method="post" class="needs-validation" novalidate>
         {% csrf_token %}
+        
         <div class="mb-3">
             <label for="name" class="form-label">Name</label>
-            <input type="text" name="name" id="name" class="form-control" value="{{ area.name }}" required>
+            <input type="text" name="name" class="form-control" value="{{ area.name }}" required>
+            <div class="invalid-feedback">Please enter a name.</div>
         </div>
+
         <div class="mb-3">
             <label for="code" class="form-label">Code</label>
-            <input type="text" name="code" id="code" class="form-control" value="{{ area.code }}" required>
+            <input type="text" name="code" class="form-control" value="{{ area.code }}" required>
+            <div class="invalid-feedback">Please enter a code.</div>
         </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox" name="is_deposit" class="form-check-input" id="is_deposit" {% if area.is_deposit %}checked{% endif %}>
+            <label for="is_deposit" class="form-check-label">Is Deposit</label>
+        </div>
+
         <button type="submit" class="btn btn-success">
-            <i class="bi bi-check-circle"></i> Save
+            <i class="bi bi-save"></i> Update Area
         </button>
-        <a href="{% url 'area_list' %}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left-circle"></i> Cancel
+        <a href="{% url 'area_list' %}" class="btn btn-secondary ms-2">
+            <i class="bi bi-arrow-left"></i> Back to List
         </a>
     </form>
 </div>
+
+<!-- Bootstrap Form Validation Script -->
+<script>
+    (function () {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
 {% endblock %}

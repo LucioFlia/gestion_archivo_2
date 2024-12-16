@@ -51,22 +51,46 @@ def is_admin(user):
 def is_user_or_manager(user):
     return user.role in ['user', 'manager']
 
+import csv
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib import messages
+from .models import Area
+
+def is_admin(user):
+    return user.role == 'admin'
+
 @login_required
 @user_passes_test(is_admin)
 def area_import(request):
     if request.method == "POST":
         csv_file = request.FILES.get("csv_file")
+
         if csv_file:
-            decoded_file = csv_file.read().decode("utf-8").splitlines()
-            reader = csv.DictReader(decoded_file)
-            for row in reader:
-                name = row.get("name")
-                code = row.get("code")
-                if name and code:
-                    if not Area.objects.filter(code=code).exists():
-                        Area.objects.create(name=name, code=code)
-            return redirect("area_list")
+            try:
+                decoded_file = csv_file.read().decode("utf-8").splitlines()
+                reader = csv.DictReader(decoded_file)
+
+                for row in reader:
+                    name = row.get("name")
+                    code = row.get("code")
+                    is_deposit = row.get("is_deposit", "False").strip().lower() == "true"
+
+                    if name and code:
+                        # Crear el área solo si no existe otra con el mismo código
+                        Area.objects.get_or_create(
+                            code=code,
+                            defaults={"name": name, "is_deposit": is_deposit}
+                        )
+
+                messages.success(request, "Areas imported successfully.")
+                return redirect("area_list")
+
+            except Exception as e:
+                messages.error(request, f"Error importing areas: {str(e)}")
+
     return render(request, "area_import.html")
+
 
 
 @login_required
@@ -75,27 +99,38 @@ def area_list(request):
     areas = Area.objects.all()
     return render(request, "area_list.html", {"areas": areas})
 
+
 @login_required
 @user_passes_test(is_admin)
 def area_create(request):
     if request.method == "POST":
         name = request.POST.get("name")
         code = request.POST.get("code")
+        is_deposit = request.POST.get("is_deposit") == "on"
+
         if name and code:
-            Area.objects.create(name=name, code=code)
+            Area.objects.create(name=name, code=code, is_deposit=is_deposit)
             return redirect("area_list")
+
     return render(request, "area_create.html")
+
+
+
 
 @login_required
 @user_passes_test(is_admin)
 def area_update(request, area_id):
     area = get_object_or_404(Area, id=area_id)
+
     if request.method == "POST":
         area.name = request.POST.get("name", area.name)
         area.code = request.POST.get("code", area.code)
+        area.is_deposit = request.POST.get("is_deposit") == "on"
         area.save()
         return redirect("area_list")
+
     return render(request, "area_update.html", {"area": area})
+
 
 @login_required
 @user_passes_test(is_admin)
@@ -106,49 +141,57 @@ def area_delete(request, area_id):
         return redirect("area_list")
     return render(request, "area_delete.html", {"area": area})
 
+@login_required
 @user_passes_test(is_admin)
 def user_list(request):
     users = User.objects.all()
     return render(request, "user_list.html", {"users": users})
 
+@login_required
 @user_passes_test(is_admin)
 def user_create(request):
-    ROLE_CHOICES = User.ROLE_CHOICES  # Obtener las opciones de roles
-    areas = Area.objects.all()  # Obtener todas las áreas disponibles
+    ROLE_CHOICES = User.ROLE_CHOICES
+    areas = Area.objects.all()
 
     if request.method == "POST":
         username = request.POST.get("username")
-        email = request.POST.get("email")
         password = request.POST.get("password")
         role = request.POST.get("role")
         area_id = request.POST.get("area")
+        deposit_id = request.POST.get("deposit")
 
         if username and password and role:
             area = Area.objects.get(id=area_id) if area_id else None
+            deposit = Area.objects.get(id=deposit_id) if deposit_id else None
+
             User.objects.create_user(
                 username=username,
-                email=email,
                 password=password,
                 role=role,
-                area=area
+                area=area,
+                deposit=deposit
             )
             return redirect("user_list")
 
     return render(request, "user_create.html", {"roles": ROLE_CHOICES, "areas": areas})
 
 
+@login_required
 @user_passes_test(is_admin)
 def user_update(request, user_id):
     user = get_object_or_404(User, id=user_id)
     areas = Area.objects.all()
-    ROLE_CHOICES = User.ROLE_CHOICES  # Obtener los roles disponibles
+    ROLE_CHOICES = User.ROLE_CHOICES
 
     if request.method == "POST":
         user.username = request.POST.get("username", user.username)
-        user.email = request.POST.get("email", user.email)
         user.role = request.POST.get("role", user.role)
         area_id = request.POST.get("area")
-        user.area = Area.objects.get(id=area_id) if area_id else None
+        deposit_id = request.POST.get("deposit")
+
+        user.area = Area.objects.get(id=area_id) if area_id else user.area
+        user.deposit = Area.objects.get(id=deposit_id) if deposit_id else user.deposit
+
         password = request.POST.get("password")
         if password:
             user.set_password(password)
@@ -156,8 +199,10 @@ def user_update(request, user_id):
         return redirect("user_list")
 
     return render(request, "user_update.html", {"user": user, "areas": areas, "roles": ROLE_CHOICES})
-#return render(request, "user_update.html", {"user": user, "areas": areas})
 
+
+#return render(request, "user_update.html", {"user": user, "areas": areas})
+@login_required
 @user_passes_test(is_admin)
 def user_delete(request, user_id):
     user = get_object_or_404(User, id=user_id)
@@ -166,6 +211,7 @@ def user_delete(request, user_id):
         return redirect("user_list")
     return render(request, "user_delete.html", {"user": user})
 
+@login_required
 @user_passes_test(is_admin)
 def user_import(request):
     if request.method == "POST":
@@ -428,6 +474,16 @@ def save_and_generate_pdf(request):
                 name=name
             )
             box_fields = {k: v for k, v in box.__dict__.items() if not k.startswith("_")}
+            BoxLog.objects.create(
+                log_type='new',
+                box=box,
+                previous_status='N/A',
+                new_status=box.status,
+                observations='Box created',
+                user=box.user,
+                user_area=box.user.area
+            )
+
         
             path_to_wkhtmltopdf = r"./wkhtmltopdf.exe"
             config = pdfkit.configuration(wkhtmltopdf=path_to_wkhtmltopdf)

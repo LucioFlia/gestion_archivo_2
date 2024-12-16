@@ -1,9 +1,28 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.conf import settings
 from django.db import models
 from datetime import datetime
 
+class UserManager(BaseUserManager):
+    def create_user(self, username, password=None, area=None, **extra_fields):
+        if not area:
+            print("# Crear un área por defecto si no se proporciona una")
+            area, created = Area.objects.get_or_create(name="Default Area", code="DEFAULT")
+
+        extra_fields.setdefault("is_active", True)
+        user = self.model(username=username, area=area, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, password=None, area=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+
+        return self.create_user(username, password, area, **extra_fields)
+
+    
 class SystemConfigKeyValues(models.Model):
     key = models.CharField(max_length=100, unique=True)
     value = models.CharField(max_length=255)
@@ -18,6 +37,9 @@ def get_system_config_value(key, default=None):
     except SystemConfigKeyValues.DoesNotExist:
         return default
 
+def get_default_archive():
+    return get_system_config_value('default_archive_code')
+
 class User(AbstractUser):
     ROLE_CHOICES = [
         ('user', 'User'),
@@ -26,8 +48,18 @@ class User(AbstractUser):
         ('admin', 'System Administrator')
     ]
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
-    area = models.ForeignKey('Area', on_delete=models.PROTECT,blank=True, null=True,  verbose_name="User Area")
-    deposit = models.ForeignKey('Area', on_delete=models.PROTECT,blank=True, null=True,  verbose_name="Archive", related_name='deposits')
+    area = models.ForeignKey('Area', on_delete=models.PROTECT, verbose_name="User Area")
+    deposit = models.ForeignKey(
+        'Area',
+        on_delete=models.PROTECT,
+        default=get_default_archive,
+        verbose_name="Archive",
+        related_name='deposits'
+    )
+    objects = UserManager() 
+    USERNAME_FIELD = 'username'  # El nombre de usuario es el campo principal
+    REQUIRED_FIELDS = []  # No hay campos obligatorios adicionales
+
 
     def __str__(self):
         return self.username
@@ -36,8 +68,8 @@ class User(AbstractUser):
 class Area(models.Model):
     code = models.CharField(max_length=30, unique=True, verbose_name="Area Code")
     name = models.CharField(max_length=100, unique=True, verbose_name="Area Name")
-
     description = models.TextField(blank=True, null=True, verbose_name="Description")
+    is_deposit = models.BooleanField(default=False, verbose_name="Is Deposit")
 
     def __str__(self):
         return self.name
@@ -71,7 +103,7 @@ class Box(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="Box ID")  # Auto-incremental ID
     creation_date = models.DateTimeField(auto_now_add=True, verbose_name="Creation Date")
     update_date =  models.DateTimeField(auto_now=True)
-    close_date = models.DateTimeField(blank=True, null=True, verbose_name="Close Date")
+    close_date = models.DateTimeField(blank=True, null=True, default=None, verbose_name="Close Date")
     current_year = datetime.now().year
 
     destruction_year = models.PositiveSmallIntegerField(
@@ -179,19 +211,3 @@ class BoxLog(models.Model):
     def __str__(self):
         return f"Log for Box {self.box.id} - {self.previous_status} to {self.new_status}"
 
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from .models import Box, BoxLog
-
-@receiver(post_save, sender=Box)
-def create_box_log(sender, instance, created, **kwargs):
-    if created:
-        BoxLog.objects.create(
-            log_type='new',
-            box=instance,
-            previous_status='N/A',
-            new_status=instance.status,
-            observations='Box created',
-            user=instance.user,
-            user_area=instance.user.area
-        )
