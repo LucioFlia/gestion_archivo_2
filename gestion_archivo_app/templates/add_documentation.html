@@ -9,60 +9,66 @@
             <h4 class="text-center mb-0">Add Documentation to Box: {{ box.name }}</h4>
         </div>
         <div class="card-body">
-            {% if error %}
-                <div class="alert alert-danger">{{ error }}</div>
-            {% endif %}
-            <form method="post">
+            <form method="post" class="needs-validation" novalidate>
                 {% csrf_token %}
                 <div class="mb-3">
                     <label for="cuit_number" class="form-label">CUIT Number</label>
                     <input type="number" id="cuit_number" name="cuit_number" class="form-control" required>
+                    <div class="invalid-feedback">Please enter a valid CUIT number.</div>
                 </div>
+
                 <div class="mb-3">
                     <label for="name" class="form-label">Document Name</label>
                     <input type="text" id="name" name="name" class="form-control" required>
+                    <div class="invalid-feedback">Please enter the document name.</div>
                 </div>
-    
-                    
-                        <label for="doc_type" class="form-label">Document Type</label>
-                        <div class="input-group">
-                        <select id="doc_type" name="doc_type" class="form-select" required>
 
-                        <option value="" disabled selected>Select Type</option>
+                <div class="mb-3">
+                    <label for="doc_type" class="form-label">Document Type</label>
+                    <div class="input-group">
+                        <select id="doc_type" name="doc_type" class="form-select" required>
+                            <option value="" disabled selected>Select Type</option>
                             {% for doc_type in doc_types %}
                                 <option value="{{ doc_type.id }}">{{ doc_type.name }}</option>
                             {% endfor %}
                         </select>
+                        <div class="invalid-feedback">Please select a document type.</div>
                         <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createDocTypeModal">
                             <i class="bi bi-plus-square"></i> Add New DocType
                         </button>
                     </div>
+                </div>
 
                 <div class="mb-3">
                     <label for="description" class="form-label">Description</label>
                     <textarea id="description" name="description" class="form-control" rows="3"></textarea>
                 </div>
+
                 <div class="mb-3">
                     <label for="corpus" class="form-label">Corpus</label>
                     <textarea id="corpus" name="corpus" class="form-control" rows="5" required></textarea>
+                    <div class="invalid-feedback">Please enter the corpus.</div>
                 </div>
+
                 <div class="mb-3">
                     <label for="sheets" class="form-label">Number of Sheets</label>
                     <input type="number" id="sheets" name="sheets" class="form-control" required>
+                    <div class="invalid-feedback">Please enter the number of sheets.</div>
                 </div>
+
                 <button type="submit" name="save_and_continue" class="btn btn-primary">
                     <i class="bi bi-arrow-repeat"></i> Save and Continue
                 </button>
                 <button type="submit" name="save_and_exit" class="btn btn-success">
                     <i class="bi bi-check-circle"></i> Save and Exit
                 </button>
+                <a href="{% url 'edit_box_documentation' box.id %}" class="btn btn-secondary ms-2">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
             </form>
         </div>
     </div>
 </div>
-
-
-
 
 <!-- Modal -->
 <div class="modal fade" id="createDocTypeModal" tabindex="-1" aria-labelledby="createDocTypeModalLabel" aria-hidden="true">
@@ -79,20 +85,35 @@
     </div>
 </div>
 
+<!-- Bootstrap Form Validation Script -->
+<script>
+    (function () {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
 
 <script>
+    function addNewDocType(id, name) {
+        const select = document.getElementById('doc_type');
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = name;
+        option.selected = true;
+        select.appendChild(option);
 
-function addNewDocType(id, name) {
-    const select = document.getElementById('doc_type');
-    const option = document.createElement('option');
-    option.value = id;
-    option.textContent = name;
-    option.selected = true;
-    select.appendChild(option);
-
-    // Close the modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('createDocTypeModal'));
-    modal.hide();       
-}
+        // Close the modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('createDocTypeModal'));
+        modal.hide();
+    }
 </script>
 {% endblock %}

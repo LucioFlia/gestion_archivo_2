@@ -1,25 +1,85 @@
 {% extends "base.html" %}
 
-{% block content %}
-<div class="container-fluid mt-4">
-    <h2 class="mb-4">Edit Documentation for Box: {{ box.name }}</h2>
+{% block title %}Edit Documentation{% endblock %}
 
-    <form method="post">
-        {% csrf_token %}
-        <div class="mb-3">
-            <label for="name" class="form-label">Name</label>
-            <input type="text" name="name" id="name" class="form-control" value="{{ initial_data.name }}" required>
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="text-center mb-0">Edit Documentation for Box: {{ box.name }}</h4>
         </div>
-        <div class="mb-3">
-            <label for="sheets" class="form-label">Sheets</label>
-            <input type="number" name="sheets" id="sheets" class="form-control" value="{{ initial_data.sheets }}" required>
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="cuit_number" class="form-label">CUIT Number</label>
+                    <input type="number" id="cuit_number" name="cuit_number" class="form-control" value="{{ documentation.cuit_number }}" required>
+                    <div class="invalid-feedback">Please enter a valid CUIT number.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Document Name</label>
+                    <input type="text" id="name" name="name" class="form-control" value="{{ documentation.name }}" required>
+                    <div class="invalid-feedback">Please enter the document name.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="doc_type" class="form-label">Document Type</label>
+                    <select id="doc_type" name="doc_type" class="form-select" required>
+                        <option value="" disabled>Select Type</option>
+                        {% for doc_type in doc_types %}
+                            <option value="{{ doc_type.id }}" {% if documentation.doc_type.id == doc_type.id %}selected{% endif %}>
+                                {{ doc_type.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="invalid-feedback">Please select a document type.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea id="description" name="description" class="form-control" rows="3">{{ documentation.description }}</textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="corpus" class="form-label">Corpus</label>
+                    <textarea id="corpus" name="corpus" class="form-control" rows="5" required>{{ documentation.corpus }}</textarea>
+                    <div class="invalid-feedback">Please enter the corpus.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="sheets" class="form-label">Number of Sheets</label>
+                    <input type="number" id="sheets" name="sheets" class="form-control" value="{{ documentation.sheets }}" required>
+                    <div class="invalid-feedback">Please enter the number of sheets.</div>
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-save"></i> Save Changes
+                </button>
+                <a href="{% url 'edit_box_documentation' box.id %}" class="btn btn-secondary ms-2">
+                    <i class="bi bi-arrow-left"></i> Back to Documentation List
+                </a>
+
+            </form>
         </div>
-        <div class="mb-3">
-            <label for="description" class="form-label">Description</label>
-            <textarea name="description" id="description" class="form-control" rows="3">{{ initial_data.description }}</textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-        <a href="{% url 'edit_box_documentation' box.id %}" class="btn btn-secondary">Cancel</a>
-    </form>
+    </div>
 </div>
+
+<!-- Bootstrap Form Validation Script -->
+<script>
+    (function () {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
 {% endblock %}

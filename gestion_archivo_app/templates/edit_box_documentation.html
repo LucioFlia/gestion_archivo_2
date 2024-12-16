@@ -1,79 +1,60 @@
 {% extends "base.html" %}
 
+{% block title %}Edit Box Documentation{% endblock %}
+
 {% block content %}
-<div class="container-fluid mt-4">
+<div class="container mt-5">
     <div class="card shadow">
         <div class="card-header bg-primary text-white">
-            <h4 class="text-center mb-0">
-                {% if box.status == 'open' %}
-                {% if user.role == "user" or user.role == "manager" %}
-                
-                Edit
-                {% endif %}
-                {%endif%} Documentation - Box: {{ box.name }}, Number of sheets {{ box.total_sheets }}, Status: {{ box.status }}</h4>
+            <h4 class="text-center mb-0">Documentation for Box: {{ box.name }}</h4>
         </div>
         <div class="card-body">
-            {% if error %}
-                <div class="alert alert-danger">{{ error }}</div>
-            {% endif %}
-
-    <!-- Botones alineados a la izquierda -->
-    <div class="mb-3 d-flex gap-2">
-        <a href="{% url 'main' %}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left-circle"></i> Back
-        </a>        
-        {% if box.status == 'open' %}
-            {% if user.role == "user" or user.role == "manager" %}
-        <a href="{% url 'add_documentation' box.id %}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Add Documentation
-        </a>
-        {% endif %}
-        {% endif %}
-
-    </div>
-
-
-    <!-- Lista de documentaciones -->
-    <div class="table-responsive">
-        <table class="table table-bordered table-striped">
-            <thead class="table-light">
-                <tr>
-                    <th scope="col">Name</th>
-                    <th scope="col">Sheets</th>
-                    <th scope="col">Description</th>
-                    <th scope="col" class="text-center">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for doc in documentations %}
+            <table class="table table-striped table-bordered">
+                <thead>
                     <tr>
-                        <td>{{ doc.name }}</td>
-                        <td>{{ doc.sheets }}</td>
-                        <td>{{ doc.description }}</td>
-                        <td class="text-center">
-                        {% if box.status == 'open' %}
-                            {% if user.role == "user" or user.role == "manager" %}
-                            <a href="{% url 'edit_documentation' box.id doc.id %}" 
-                               class="btn btn-sm btn-warning me-2">
-                                <i class="bi bi-pencil-square"></i> Edit
-                            </a>
-                            <a href="{% url 'delete_documentation' doc.id %}" 
-                               class="btn btn-sm btn-danger" 
-                               onclick="return confirm('Are you sure you want to delete this documentation?');">
-                                <i class="bi bi-trash"></i> Delete
-                            </a>
-                            {% endif %}
-                        {% endif %}
-                        </td>
+                        <th>CUIT Number</th>
+                        <th>Document Name</th>
+                        <th>Document Type</th>
+                        <th>Description</th>
+                        <th>Corpus</th>
+                        <th>Number of Sheets</th>
+                        <th>Actions</th>
                     </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center">No documentation added yet.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for doc in documentations %}
+                        <tr>
+                            <td>{{ doc.cuit_number }}</td>
+                            <td>{{ doc.name }}</td>
+                            <td>{{ doc.doc_type.name }}</td>
+                            <td>{{ doc.description }}</td>
+                            <td>{{ doc.corpus }}</td>
+                            <td>{{ doc.sheets }}</td>
+                            <td class="text-center">
+                                <a href="{% url 'edit_documentation' box.id doc.id %}" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </a>
+                                <a href="{% url 'delete_documentation' doc.id %}" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash"></i> Delete
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No documentation available for this box.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'add_documentation' box.id %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add Documentation
+                </a>
+                <a href="{% url 'main' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Main
+                </a>
+            </div>
+        </div>
     </div>
 </div>
-</div></div>
 {% endblock %}

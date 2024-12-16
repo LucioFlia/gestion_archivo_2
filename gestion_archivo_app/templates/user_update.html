@@ -3,71 +3,87 @@
 {% block title %}Update User{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4">Update User</h2>
-    <form method="post" class="needs-validation" novalidate>
-        {% csrf_token %}
-
-        <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" name="username" class="form-control" value="{{ user.username }}" required>
-            <div class="invalid-feedback">Please enter a username.</div>
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Update User</h4>
         </div>
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
 
-        <div class="mb-3">
-            <label for="first_name" class="form-label">First Name</label>
-            <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}" required>
-            <div class="invalid-feedback">Please enter a first name.</div>
-        </div>
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" id="username" name="username" class="form-control" value="{{ user.username }}" required>
+                    <div class="invalid-feedback">Please enter a username.</div>
+                </div>
 
-        <div class="mb-3">
-            <label for="last_name" class="form-label">Last Name</label>
-            <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}" required>
-            <div class="invalid-feedback">Please enter a last name.</div>
-        </div>
+                <div class="mb-3">
+                    <label for="first_name" class="form-label">First Name</label>
+                    <input type="text" id="first_name" name="first_name" class="form-control" value="{{ user.first_name }}" required>
+                    <div class="invalid-feedback">Please enter the first name.</div>
+                </div>
 
-        <div class="mb-3">
-            <label for="role" class="form-label">Role</label>
-            <select name="role" class="form-select" required>
-                {% for role, role_name in roles %}
-                    <option value="{{ role }}" {% if user.role == role %}selected{% endif %}>
-                        {{ role_name }}
-                    </option>
-                {% endfor %}
-            </select>
-            <div class="invalid-feedback">Please select a role.</div>
-        </div>
+                <div class="mb-3">
+                    <label for="last_name" class="form-label">Last Name</label>
+                    <input type="text" id="last_name" name="last_name" class="form-control" value="{{ user.last_name }}" required>
+                    <div class="invalid-feedback">Please enter the last name.</div>
+                </div>
 
-        <div class="mb-3">
-            <label for="area" class="form-label">User Area</label>
-            <select name="area" class="form-select" required>
-                {% for area in areas %}
-                    <option value="{{ area.id }}" {% if user.area.id == area.id %}selected{% endif %}>
-                        {{ area.name }}
-                    </option>
-                {% endfor %}
-            </select>
-            <div class="invalid-feedback">Please select an area.</div>
-        </div>
-        <div class="mb-3">
-            <label for="deposit" class="form-label">Deposit</label>
-            <select name="deposit" class="form-select" required>
-                {% for area in areas %}
-                    {% if area.is_deposit %}
-                        <option value="{{ area.id }}">{{ area.name }}</option>
-                    {% endif %}
-                {% endfor %}
-            </select>
-            <div class="invalid-feedback">Please select a deposit.</div>
-        </div>
+                <div class="mb-3">
+                    <label for="role" class="form-label">Role</label>
+                    <select id="role" name="role" class="form-select" required>
+                        <option value="" disabled>Select Role</option>
+                        {% for role_value, role_display in roles %}
+                            <option value="{{ role_value }}" {% if user.role == role_value %}selected{% endif %}>
+                                {{ role_display }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="invalid-feedback">Please select a role.</div>
+                </div>
 
-        <button type="submit" class="btn btn-primary">
-            <i class="bi bi-save"></i> Update User
-        </button>
-        <a href="{% url 'user_list' %}" class="btn btn-secondary ms-2">
-            <i class="bi bi-arrow-left"></i> Back to List
-        </a>
-    </form>
+                <div class="mb-3">
+                    <label for="area" class="form-label">Area</label>
+                    <select id="area" name="area" class="form-select" required>
+                        <option value="" disabled>Select Area</option>
+                        {% for area in areas %}
+                            <option value="{{ area.id }}" {% if user.area.id == area.id %}selected{% endif %}>
+                                {{ area.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="invalid-feedback">Please select an area.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="deposit" class="form-label">Deposit</label>
+                    <select id="deposit" name="deposit" class="form-select" required>
+                        <option value="" disabled>Select Deposit</option>
+                        {% for area in areas %}
+                            <option value="{{ area.id }}" {% if user.deposit.id == area.id %}selected{% endif %}>
+                                {{ area.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="invalid-feedback">Please select a deposit.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password (leave blank to keep current password)</label>
+                    <input type="password" id="password" name="password" class="form-control">
+                </div>
+
+                <!-- Buttons -->
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-save"></i> Save Changes
+                </button>
+                <a href="{% url 'user_list' %}" class="btn btn-secondary ms-2">
+                    <i class="bi bi-arrow-left"></i> Back to User List
+                </a>
+            </form>
+        </div>
+    </div>
 </div>
 
 <!-- Bootstrap Form Validation Script -->

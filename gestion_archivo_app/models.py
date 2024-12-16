@@ -47,7 +47,7 @@ class User(AbstractUser):
         ('archive_responsible', 'Archive Responsible'),
         ('admin', 'System Administrator')
     ]
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    role = models.CharField(max_length=32, choices=ROLE_CHOICES)
     area = models.ForeignKey('Area', on_delete=models.PROTECT, verbose_name="User Area")
     deposit = models.ForeignKey(
         'Area',
@@ -57,12 +57,9 @@ class User(AbstractUser):
         related_name='deposits'
     )
     objects = UserManager() 
-    USERNAME_FIELD = 'username'  # El nombre de usuario es el campo principal
-    REQUIRED_FIELDS = []  # No hay campos obligatorios adicionales
+    USERNAME_FIELD = 'username'  
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'role']  
 
-
-    def __str__(self):
-        return self.username
     
 
 class Area(models.Model):
@@ -112,8 +109,7 @@ class Box(models.Model):
     )
     current_area = models.ForeignKey(Area, on_delete=models.PROTECT, related_name="current_boxes", verbose_name="Current Area")
     total_sheets = models.PositiveIntegerField(default=0)  
-    print (destruction_year.choices)
-
+   
     def update_total_sheets(self):
         """
         Recalculate the total number of sheets from associated documents.

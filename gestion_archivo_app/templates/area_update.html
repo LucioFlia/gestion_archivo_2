@@ -3,35 +3,46 @@
 {% block title %}Update Area{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4">Update Area</h2>
-    <form method="post" class="needs-validation" novalidate>
-        {% csrf_token %}
-        
-        <div class="mb-3">
-            <label for="name" class="form-label">Name</label>
-            <input type="text" name="name" class="form-control" value="{{ area.name }}" required>
-            <div class="invalid-feedback">Please enter a name.</div>
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Update Area</h4>
         </div>
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
 
-        <div class="mb-3">
-            <label for="code" class="form-label">Code</label>
-            <input type="text" name="code" class="form-control" value="{{ area.code }}" required>
-            <div class="invalid-feedback">Please enter a code.</div>
+                <div class="mb-3">
+                    <label for="name" class="form-label">Area Name</label>
+                    <input type="text" id="name" name="name" class="form-control" value="{{ area.name }}" required>
+                    <div class="invalid-feedback">Please enter the area name.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="code" class="form-label">Area Code</label>
+                    <input type="text" id="code" name="code" class="form-control" value="{{ area.code }}" required>
+                    <div class="invalid-feedback">Please enter the area code.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="is_deposit" class="form-label">Is Deposit</label>
+                    <select id="is_deposit" name="is_deposit" class="form-select" required>
+                        <option value="True" {% if area.is_deposit %}selected{% endif %}>Yes</option>
+                        <option value="False" {% if not area.is_deposit %}selected{% endif %}>No</option>
+                    </select>
+                    <div class="invalid-feedback">Please select if this area is a deposit.</div>
+                </div>
+
+                <!-- Buttons -->
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-save"></i> Save Changes
+                </button>
+                <a href="{% url 'area_list' %}" class="btn btn-secondary ms-2">
+                    <i class="bi bi-arrow-left"></i> Back to Area List
+                </a>
+            </form>
         </div>
-
-        <div class="form-check mb-3">
-            <input type="checkbox" name="is_deposit" class="form-check-input" id="is_deposit" {% if area.is_deposit %}checked{% endif %}>
-            <label for="is_deposit" class="form-check-label">Is Deposit</label>
-        </div>
-
-        <button type="submit" class="btn btn-success">
-            <i class="bi bi-save"></i> Update Area
-        </button>
-        <a href="{% url 'area_list' %}" class="btn btn-secondary ms-2">
-            <i class="bi bi-arrow-left"></i> Back to List
-        </a>
-    </form>
+    </div>
 </div>
 
 <!-- Bootstrap Form Validation Script -->

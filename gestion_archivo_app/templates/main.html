@@ -112,7 +112,7 @@
                                     <!--actions column-->
                                     {% if item.status == 'open' and item.total_sheets > 0 %}
                                         {% if user.role == 'manager' or user.role == 'user' %}
-                                            <td>
+                                            <td class="text-center">
 
                                                 <a href="{% url 'request_close_box' item.id %}" class="btn btn-sm btn-warning">
                                                     <i class="bi bi-box-arrow-right"></i> Request Close
@@ -127,22 +127,22 @@
                                         <!-- box status: not open -->
                                             {% if item.status == 'waiting_for_close' and user.role == 'manager' %}
                                             <!-- user can approve_close_box-->
-                                            <td>
+                                            <td class="text-center">
                                                 <a href="{% url 'approve_close_box' item.id %}" class="btn btn-sm btn-success">
                                                     <i class="bi bi-check-circle"></i> Approve Close
                                                 </a>
                                             </td>
                                         {% elif item.status == 'closed' and user.role == 'manager' %}
                                         <!--user can send_box_to_archive-->
-                                            <td>
+                                            <td class="text-center">
                                                 <a href="{% url 'send_box_to_archive' item.id %}" class="btn btn-sm btn-primary">
                                                     <i class="bi bi-send"></i> Send to Archive
                                                 </a>
                                             </td>
                                         {% elif user.role == 'user' %}
-                                            <td>None (User is user)</td>
+                                            <tdv class="text-center">None (User is user)</td>
                                         {% else %}
-                                        <td>User is admin or Archive responsible</td>
+                                        <td class="text-center">User is admin or Archive responsible</td>
                                         {% endif %}
 
                                         {% endif %}
@@ -150,7 +150,7 @@
    
                                     <!-- log column-->
 
-                                    <td>
+                                    <td class="text-center">
                                         <a href="{% url 'box_logs' item.id %}" class="btn btn-sm btn-info">
                                             <i class="bi bi-journal-text"></i> View
                                         </a>

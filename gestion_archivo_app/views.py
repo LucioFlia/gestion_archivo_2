@@ -148,6 +148,8 @@ def user_create(request):
 
     if request.method == "POST":
         username = request.POST.get("username")
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
         password = request.POST.get("password")
         role = request.POST.get("role")
         area_id = request.POST.get("area")
@@ -159,6 +161,8 @@ def user_create(request):
 
             User.objects.create_user(
                 username=username,
+                first_name=first_name,
+                last_name=last_name,
                 password=password,
                 role=role,
                 area=area,
@@ -178,13 +182,13 @@ def user_update(request, user_id):
 
     if request.method == "POST":
         user.username = request.POST.get("username", user.username)
+        user.first_name = request.POST.get("first_name", user.first_name)
+        user.last_name = request.POST.get("last_name", user.last_name)
         user.role = request.POST.get("role", user.role)
         area_id = request.POST.get("area")
         deposit_id = request.POST.get("deposit")
-
         user.area = Area.objects.get(id=area_id) if area_id else user.area
         user.deposit = Area.objects.get(id=deposit_id) if deposit_id else user.deposit
-
         password = request.POST.get("password")
         if password:
             user.set_password(password)
@@ -366,17 +370,46 @@ def create_box(request):
 @login_required
 def preview_box(request):
     if request.method == "POST":
-        # Captura todos los datos enviados desde el formulario
-        box_data = request.POST.dict()  # Convierte los datos POST a un diccionario
-        box_fields = {k: v for k, v in box_data.items() if not k.startswith("_")}
+        # Captura los datos enviados desde el formulario
         user = request.user
-        full_name = f"{user.first_name} {user.last_name}".strip()
+        area = getattr(user, 'area', None)
 
-        area = getattr(user, 'area', None) 
-        print (box_fields, user, area)
-        return render(request, "preview_box.html", 
-                      {"box_fields": box_fields, "full_name": full_name, "area": area})
+        # Captura los datos del formulario
+        box_type_id = request.POST.get('box_type')
+        description = request.POST.get('description')
+        destruction_year = request.POST.get('destruction_year')
+        name = request.POST.get('name')  # El nombre podría generarse automáticamente al guardar
+
+        # Obtener el objeto BoxType
+        box_type = get_object_or_404(BoxType, id=box_type_id)
+
+        # Crear una instancia temporal de Box (sin guardarla en la base de datos)
+        box = Box(
+            box_type=box_type,
+            description=description,
+            user=user,
+            area=area,
+            destruction_year=destruction_year,
+            name=name,
+            status='open',
+            creation_date=datetime.now()  # Asignar fecha de creación actual
+        )
+
+        # Diccionario con los campos del box para pasar al template
+        box_fields = {
+            'name': box.name,
+            'box_type': box.box_type.name,
+            'description': box.description,
+            'destruction_year': box.destruction_year,
+            'creation_date': box.creation_date.strftime('%d/%m/%Y'),
+        }
+
+        # Renderizar el template de previsualización con los datos de la caja
+        return render(request, "preview_box.html", {"box_fields": box_fields, "user": user, "area": area})
+
+    # Redirigir si el método no es POST
     return redirect("create_box")
+
 
 
 
@@ -509,7 +542,6 @@ def add_documentation(request, box_id):
     documentations = box.documentations.all() 
 
     if request.method == "POST":
-        print (request.POST)
         cuit_number = request.POST.get("cuit_number")
         name = request.POST.get("name")
         doc_type_id = request.POST.get("doc_type")
@@ -536,7 +568,7 @@ def add_documentation(request, box_id):
             doc_added=documentation,
             previous_status=box.status,
             new_status=box.status,
-            observations=f"Document '{name}' of {sheets} sheets added.",
+            observations=f"Document '{cuit}-{name}' of {sheets} sheets added.",
             user=request.user,
             user_area=request.user.area
         )
@@ -580,55 +612,60 @@ def edit_box_documentation(request, box_id):
     })
 
 
-from django.shortcuts import get_object_or_404, redirect, render
-from .models import Box, Documentation
-
+@login_required
 def edit_documentation(request, box_id, doc_id):
     """
     View to edit a specific documentation for a given box.
     """
     box = get_object_or_404(Box, id=box_id)
     documentation = get_object_or_404(Documentation, id=doc_id, box=box)
+    doc_types = DocType.objects.all()
+    print (doc_types)
 
     if request.method == "POST":
         # Procesar datos enviados por el usuario
+        cuit_number = request.POST.get("cuit_number")
         name = request.POST.get("name")
-        sheets = request.POST.get("sheets")
+        doc_type_id = request.POST.get("doc_type")
         description = request.POST.get("description")
+        corpus = request.POST.get("corpus")
+        sheets = request.POST.get("sheets")
 
         # Validar y guardar los cambios
-        if name and sheets.isdigit():
+        if cuit_number and name and doc_type_id and corpus and sheets.isdigit():
+            documentation.cuit_number = int(cuit_number)
             documentation.name = name
-            documentation.sheets = int(sheets)
+            documentation.doc_type_id = doc_type_id
             documentation.description = description
+            documentation.corpus = corpus
+            documentation.sheets = int(sheets)
+
             documentation.save()
-            box.update_total_sheets()  
-            #log
+            box.update_total_sheets()
+            
+            # Log the update in BoxLog
             BoxLog.objects.create(
-            log_type='doc_edited',
-            box=box,
-            doc_added=documentation,
-            previous_status=box.status,
-            new_status=box.status,
-            observations=f"Document '{name}' of {sheets} sheets edited.",
-            user=request.user,
-            user_area=request.user.area
+                log_type='doc_edited',
+                box=box,
+                doc_added=documentation,
+                previous_status=box.status,
+                new_status=box.status,
+                observations=f"Document '{cuit_number}-{name}' of {sheets} sheets edited.",
+                user=request.user,
+                user_area=request.user.area
             )
+            
             messages.success(request, "The documentation was updated.")
             return redirect("edit_box_documentation", box_id=box.id)
-    else:
-        # Datos iniciales para el formulario
-        initial_data = {
-            "name": documentation.name,
-            "sheets": documentation.sheets,
-            "description": documentation.description,
-        }
 
     return render(request, "edit_documentation.html", {
         "box": box,
         "documentation": documentation,
-        "initial_data": initial_data,
+        "doc_types": doc_types,
     })
+
+
+
 
 
 def delete_documentation(request, doc_id):
@@ -663,7 +700,7 @@ def request_close_box(request, box_id):
     if box.status == 'open':
         box.status = 'waiting_for_close'
         box.save()
-        # Registrar en BoxLog
+    
         BoxLog.objects.create(
         log_type='status_change',
         box=box,
