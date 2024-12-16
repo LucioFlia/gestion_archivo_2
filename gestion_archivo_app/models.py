@@ -8,7 +8,7 @@ class UserManager(BaseUserManager):
     def create_user(self, username, password=None, area=None, **extra_fields):
         if not area:
             print("# Crear un área por defecto si no se proporciona una")
-            area, created = Area.objects.get_or_create(name="Default Area", code="DEFAULT")
+            area, created = Area.objects.get_or_create(name="Default Area", code="DEFAULT", is_deposit = False)
 
         extra_fields.setdefault("is_active", True)
         user = self.model(username=username, area=area, **extra_fields)
