@@ -49,6 +49,17 @@
             </select>
             <div class="invalid-feedback">Please select an area.</div>
         </div>
+        <div class="mb-3">
+            <label for="deposit" class="form-label">Deposit</label>
+            <select name="deposit" class="form-select" required>
+                {% for area in areas %}
+                    {% if area.is_deposit %}
+                        <option value="{{ area.id }}">{{ area.name }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+            <div class="invalid-feedback">Please select a deposit.</div>
+        </div>
 
         <button type="submit" class="btn btn-primary">
             <i class="bi bi-save"></i> Update User
