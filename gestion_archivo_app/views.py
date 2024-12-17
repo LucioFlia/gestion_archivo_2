@@ -416,6 +416,7 @@ def config_keys_values(request):
 def create_box(request):
     area = request.user.area
     user = request.user
+    first_name = request.user.first_name
     box_types = BoxType.objects.all()
     current_year = datetime.now().year
     destruction_years = [(0, 'Never')] + [(year, str(year)) for year in range(current_year, current_year + 25)]
@@ -467,7 +468,6 @@ def save_and_generate_pdf(request):
 
     if request.method == 'POST':
         box_type_id = request.POST.get('box_type_id')
-        print(box_type_id)
         description = request.POST.get('description')
         destruction_year = request.POST.get('destruction_year')
         name=request.POST.get('box_name')
@@ -487,6 +487,7 @@ def save_and_generate_pdf(request):
                 name=name
             )
             box_fields = {k: v for k, v in box.__dict__.items() if not k.startswith("_")}
+            
             BoxLog.objects.create(
                 log_type='new',
                 box=box,
@@ -498,10 +499,10 @@ def save_and_generate_pdf(request):
             )
             path_to_wkhtmltopdf = r"./wkhtmltopdf.exe"
             config = pdfkit.configuration(wkhtmltopdf=path_to_wkhtmltopdf)
-            print(box_fields)
+            #print(box_fieldss )
             template = get_template("box_pdf.html")
 
-            html = template.render({"box_fields": box_fields})
+            html = template.render({"box": box})
 
             pdf = pdfkit.from_string(html, False, configuration=config)
             messages.success(request, "The box has been created, and the PDF has been downloaded. Please check your downloads folder.")
@@ -549,7 +550,7 @@ def add_documentation(request, box_id):
             doc_added=documentation,
             previous_status=box.status,
             new_status=box.status,
-            observations=f"Document '{cuit}-{name}' of {sheets} sheets added.",
+            observations=f"Document (id:{documentation.id}) '{cuit_number}-{name}' of {sheets} sheets added.",
             user=request.user,
             user_area=request.user.area
         )
@@ -631,7 +632,7 @@ def edit_documentation(request, box_id, doc_id):
                 doc_added=documentation,
                 previous_status=box.status,
                 new_status=box.status,
-                observations=f"Document '{cuit_number}-{name}' of {sheets} sheets edited.",
+                observations=f"Document (id:{documentation.id}) '{cuit_number}-{name}' of {sheets} sheets edited.",
                 user=request.user,
                 user_area=request.user.area
             )
@@ -665,7 +666,7 @@ def delete_documentation(request, doc_id):
         doc_removed=documentation,
         previous_status=box.status,
         new_status=box.status,
-        observations=f"Document '{documentation.name}' unlinked from box.",
+        observations=f"Document (id:{documentation.id}) '{documentation.name}' unlinked from box.",
         user=request.user,
         user_area=request.user.area
     )
