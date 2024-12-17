@@ -14,19 +14,19 @@
 
                 <div class="mb-3">
                     <label for="username" class="form-label">Username</label>
-                    <input type="text" id="username" name="username" class="form-control" value="{{ user.username }}" required>
+                    <input type="text" id="username_aux" name="username_aux" class="form-control" value="{{ user_aux.username }}" required>
                     <div class="invalid-feedback">Please enter a username.</div>
                 </div>
 
                 <div class="mb-3">
                     <label for="first_name" class="form-label">First Name</label>
-                    <input type="text" id="first_name" name="first_name" class="form-control" value="{{ user.first_name }}" required>
+                    <input type="text" id="first_name" name="first_name" class="form-control" value="{{ user_aux.first_name }}" required>
                     <div class="invalid-feedback">Please enter the first name.</div>
                 </div>
 
                 <div class="mb-3">
                     <label for="last_name" class="form-label">Last Name</label>
-                    <input type="text" id="last_name" name="last_name" class="form-control" value="{{ user.last_name }}" required>
+                    <input type="text" id="last_name" name="last_name" class="form-control" value="{{ user_aux.last_name }}" required>
                     <div class="invalid-feedback">Please enter the last name.</div>
                 </div>
 
@@ -35,7 +35,7 @@
                     <select id="role" name="role" class="form-select" required>
                         <option value="" disabled>Select Role</option>
                         {% for role_value, role_display in roles %}
-                            <option value="{{ role_value }}" {% if user.role == role_value %}selected{% endif %}>
+                            <option value="{{ role_value }}" {% if user_aux.role == role_value %}selected{% endif %}>
                                 {{ role_display }}
                             </option>
                         {% endfor %}
@@ -48,7 +48,7 @@
                     <select id="area" name="area" class="form-select" required>
                         <option value="" disabled>Select Area</option>
                         {% for area in areas %}
-                            <option value="{{ area.id }}" {% if user.area.id == area.id %}selected{% endif %}>
+                            <option value="{{ area.id }}" {% if user_aux.area.id == area.id %}selected{% endif %}>
                                 {{ area.name }}
                             </option>
                         {% endfor %}
@@ -61,7 +61,7 @@
                     <select id="deposit" name="deposit" class="form-select" required>
                         <option value="" disabled>Select Deposit</option>
                         {% for area in areas %}
-                            <option value="{{ area.id }}" {% if user.deposit.id == area.id %}selected{% endif %}>
+                            <option value="{{ area.id }}" {% if user_aux.deposit.id == area.id %}selected{% endif %}>
                                 {{ area.name }}
                             </option>
                         {% endfor %}

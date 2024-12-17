@@ -33,19 +33,19 @@
                         </tr>
                     </thead>
                     <tbody id="tableBodyId">
-                        {% for user in users %}
+                        {% for user_aux in users %}
                             <tr>
-                                <td>{{ user.username }}</td>
-                                <td>{{ user.first_name }}</td>
-                                <td>{{ user.last_name }}</td>
-                                <td>{{ user.get_role_display }}</td>
-                                <td>{{ user.area.name }}</td>
-                                <td>{{ user.deposit.name }}</td>
+                                <td>{{ user_aux.username }}</td>
+                                <td>{{ user_aux.first_name }}</td>
+                                <td>{{ user_aux.last_name }}</td>
+                                <td>{{ user_aux.get_role_display }}</td>
+                                <td>{{ user_aux.area.name }}</td>
+                                <td>{{ user_aux.deposit.name }}</td>
                                 <td class="text-center">
-                                    <a href="{% url 'user_update' user.id %}" class="btn btn-sm btn-warning">
+                                    <a href="{% url 'user_update' user_aux.id %}" class="btn btn-sm btn-warning">
                                         <i class="bi bi-pencil-square"></i> Edit
                                     </a>
-                                    <a href="{% url 'user_delete' user.id %}" class="btn btn-sm btn-danger">
+                                    <a href="{% url 'user_delete' user_aux.id %}" class="btn btn-sm btn-danger">
                                         <i class="bi bi-trash"></i> Delete
                                     </a>
                                 </td>

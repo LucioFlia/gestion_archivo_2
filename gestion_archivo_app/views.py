@@ -175,26 +175,27 @@ def user_create(request):
 @login_required
 @user_passes_test_with_message(is_admin, "Only the admin can access this page.")
 def user_update(request, user_id):
-    user = get_object_or_404(User, id=user_id)
+    userd = get_object_or_404(User, id=user_id)
+    print(userd)
     areas = Area.objects.all()
     ROLE_CHOICES = User.ROLE_CHOICES
 
     if request.method == "POST":
-        user.username = request.POST.get("username", user.username)
-        user.first_name = request.POST.get("first_name", user.first_name)
-        user.last_name = request.POST.get("last_name", user.last_name)
-        user.role = request.POST.get("role", user.role)
+        userd.username = request.POST.get("username", userd.username)
+        userd.first_name = request.POST.get("first_name", userd.first_name)
+        userd.last_name = request.POST.get("last_name", userd.last_name)
+        userd.role = request.POST.get("role", userd.role)
         area_id = request.POST.get("area")
         deposit_id = request.POST.get("deposit")
-        user.area = Area.objects.get(id=area_id) if area_id else user.area
-        user.deposit = Area.objects.get(id=deposit_id) if deposit_id else user.deposit
+        userd.area = Area.objects.get(id=area_id) if area_id else userd.area
+        userd.deposit = Area.objects.get(id=deposit_id) if deposit_id else userd.deposit
         password = request.POST.get("password")
         if password:
-            user.set_password(password)
-        user.save()
+            userd.set_password(password)
+        userd.save()
         return redirect("user_list")
 
-    return render(request, "user_update.html", {"user": user, "areas": areas, "roles": ROLE_CHOICES})
+    return render(request, "user_update.html", {"user_aux": userd, "areas": areas, "roles": ROLE_CHOICES})
 
 
 #return render(request, "user_update.html", {"user": user, "areas": areas})
