@@ -6,13 +6,13 @@
 <div class="container mt-4">
     <div class="card shadow">
         <div class="card-header bg-primary text-white text-center">
-            <h4 class="mb-0">REGIONAL DIRECTORATE RÍO CUARTO - AFIP</h4>
+            <h4 class="mb-0">{{ config_name_org }}</h4>
         </div>
         <div class="card-body">
 
             <!-- Box Information -->
             <div class="mb-3">
-                <span class="fw-bold">BOX NO:</span> {{ box_fields.name }}
+                <span class="fw-bold">BOX TYPE:</span> {{ box.box_type.name }}
             </div>
 
             <div class="mb-3">
@@ -20,8 +20,11 @@
             </div>
 
             <div class="mb-3">
-                <span class="fw-bold">OPENING DATE:</span> {{ box_fields.creation_date }}
-                <span class="fw-bold ms-4">DESTRUCTION YEAR:</span> {{ box_fields.destruction_year }}
+                <span class="fw-bold">OPENING DATE:</span> {{ box.creation_date|date:"d/m/Y" }}
+            </div>
+
+            <div class="mb-3">
+                <span class="fw-bold">DESTRUCTION YEAR:</span> {{ box.destruction_year }}
             </div>
 
             <div class="mb-3">
@@ -29,28 +32,7 @@
             </div>
 
             <div class="mb-3">
-                <span class="fw-bold">BOX TYPE:</span> {{ box_fields.box_type }}
-            </div>
-
-            <div class="mb-3">
-                <span class="fw-bold">DESCRIPTION:</span> {{ box_fields.description }}
-            </div>
-
-            <!-- Signature Fields -->
-            <div class="mt-4">
-                <div class="mb-4">
-                    <span class="fw-bold">SIGNATURE:</span>
-                    <div class="border-bottom mt-2" style="width: 300px;"></div>
-                </div>
-
-                <div class="mb-4">
-                    <span class="fw-bold">HEAD SEAL:</span>
-                </div>
-
-                <div class="mb-4">
-                    <span class="fw-bold">HEAD SIGNATURE:</span>
-                    <div class="border-bottom mt-2" style="width: 300px;"></div>
-                </div>
+                <span class="fw-bold">DESCRIPTION:</span> {{ box.description }}
             </div>
 
             <!-- Buttons -->
@@ -61,10 +43,10 @@
                 <form method="POST" action="{% url 'save_and_generate_pdf' %}" target="_blank">
                     {% csrf_token %}
                     <!-- Hidden fields to pass box data -->
-                    {% for field, value in box_fields.items %}
-                        <input type="hidden" name="{{ field }}" value="{{ value }}">
-                    {% endfor %}
-                    <button class="btn btn-primary" type="submit" onclick="redirectAfterDownload()">
+                    <input type="hidden" name="box_type" value="{{ box.box_type.id }}">
+                    <input type="hidden" name="description" value="{{ box.description }}">
+                    <input type="hidden" name="destruction_year" value="{{ box.destruction_year }}">
+                    <button class="btn btn-primary" type="submit">
                         Save & Download PDF <i class="bi bi-arrow-right-circle"></i>
                     </button>
                 </form>
@@ -72,24 +54,4 @@
         </div>
     </div>
 </div>
-
-<!-- Script for Redirecting After Download -->
-<script>
-    function redirectAfterDownload() {
-        const checkStatus = () => {
-            fetch("{% url 'check_download_status' %}")
-                .then(response => response.json())
-                .then(data => {
-                    if (data.ready) {
-                        window.location.href = "{% url 'main' %}";
-                    } else {
-                        setTimeout(checkStatus, 1000);
-                    }
-                });
-        };
-
-        // Start checking the download status
-        checkStatus();
-    }
-</script>
 {% endblock %}

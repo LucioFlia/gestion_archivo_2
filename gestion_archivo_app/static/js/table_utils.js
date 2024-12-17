@@ -112,6 +112,9 @@ function checkTableRecords() {
 if (document.getElementById('noRecordsMessage')){
 document.addEventListener('DOMContentLoaded', checkTableRecords);
 }
+
+
+
 if (document.getElementById('noRecordsMessage')){
 document.addEventListener("DOMContentLoaded", function() {
     

@@ -351,72 +351,28 @@ def create_doc_type(request):
     return render(request, 'create_doc_type.html', context)
 
 @login_required
-@user_passes_test_with_message(is_user_or_manager, message="Only users and managers can access this page.")
-def create_box(request):
+def main(request):
+    if request.user.role == 'admin':
+        items = Box.objects.all().order_by('-name')
+    else:
+        user_area = request.user.area
+        items = Box.objects.filter(area=user_area).order_by('-name')
+    # Filter open boxes
     user_area = request.user.area
-    box_types = BoxType.objects.all()  # Retrieve all available box types
-    current_year = datetime.now().year
-    destruction_years = [(0,'Never')] + [(year, str(year)) for year in range(current_year, current_year + 25)]
-    suggested_year = current_year + 5
-    boxes = Box.objects.filter(current_area=user_area, status='open').order_by('-creation_date') 
-    return render(request, 'create_box.html', {'box_types': box_types, 
-                                               'destruction_years': destruction_years,
-                                               'suggested_year': suggested_year,
-                                               'boxes': boxes,
-                                               'user_area': user_area})
+    
+    return render(request, "main.html", {"items": items})
 
-
+# Variable global para indicar si la descarga está lista (podría usarse una solución más robusta como un cache)
+is_download_ready = False
 
 @login_required
-def preview_box(request):
-    if request.method == "POST":
-        # Captura los datos enviados desde el formulario
-        user = request.user
-        area = getattr(user, 'area', None)
-
-        # Captura los datos del formulario
-        box_type_id = request.POST.get('box_type')
-        description = request.POST.get('description')
-        destruction_year = request.POST.get('destruction_year')
-        name = request.POST.get('name')  # El nombre podría generarse automáticamente al guardar
-
-        # Obtener el objeto BoxType
-        box_type = get_object_or_404(BoxType, id=box_type_id)
-
-        # Crear una instancia temporal de Box (sin guardarla en la base de datos)
-        box = Box(
-            box_type=box_type,
-            description=description,
-            user=user,
-            area=area,
-            destruction_year=destruction_year,
-            name=name,
-            status='open',
-            creation_date=datetime.now()  # Asignar fecha de creación actual
-        )
-
-        # Diccionario con los campos del box para pasar al template
-        box_fields = {
-            'name': box.name,
-            'box_type': box.box_type.name,
-            'description': box.description,
-            'destruction_year': box.destruction_year,
-            'creation_date': box.creation_date.strftime('%d/%m/%Y'),
-        }
-
-        # Renderizar el template de previsualización con los datos de la caja
-        return render(request, "preview_box.html", {"box_fields": box_fields, "user": user, "area": area})
-
-    # Redirigir si el método no es POST
-    return redirect("create_box")
-
-
-
-
-
-
-
-
+def check_download_status(request):
+    global is_download_ready
+    # Verificar si la descarga está lista
+    #print (is_download_ready)
+    response = JsonResponse({"ready": is_download_ready})
+    is_download_ready = False
+    return response
 @login_required
 def config_keys_values(request):
     configs = SystemConfigKeyValues.objects.all()
@@ -457,27 +413,63 @@ def config_keys_values(request):
 
 
 @login_required
-def main(request):
-    if request.user.role == 'admin':
-        items = Box.objects.all().order_by('-name')
-    else:
-        user_area = request.user.area
-        items = Box.objects.filter(area=user_area).order_by('-name')
-    # Filter open boxes
+@user_passes_test_with_message(is_user_or_manager, message="Only users and managers can access this page.")
+def create_box(request):
     user_area = request.user.area
-    
-    return render(request, "main.html", {"items": items})
+    box_types = BoxType.objects.all()
+    current_year = datetime.now().year
+    destruction_years = [(0, 'Never')] + [(year, str(year)) for year in range(current_year, current_year + 25)]
+    suggested_year = current_year + 5
 
-# Variable global para indicar si la descarga está lista (podría usarse una solución más robusta como un cache)
-is_download_ready = False
+    # Initial form display
+    boxes = Box.objects.filter(current_area=user_area, status='open').order_by('-creation_date')
+    return render(request, 'create_box.html', {
+        'box_types': box_types,
+        'destruction_years': destruction_years,
+        'suggested_year': suggested_year,
+        'boxes': boxes,
+        'user_area': user_area
+    })
+
+
 @login_required
-def check_download_status(request):
-    global is_download_ready
-    # Verificar si la descarga está lista
-    #print (is_download_ready)
-    response = JsonResponse({"ready": is_download_ready})
-    is_download_ready = False
-    return response
+def preview_box(request):
+    if request.method == 'POST':
+        # Capture form data
+        box_type = request.POST.get('box_type')
+        print (box_type)
+        description = request.POST.get('description')
+        destruction_year = request.POST.get('destruction_year')
+        area = request.user.area
+        user = request.user
+        name='to be defined'
+        print (box_type)
+      # Obtener el objeto BoxType
+        box_type = get_object_or_404(BoxType, id=box_type)
+
+        # Crear una instancia temporal de Box (sin guardarla en la base de datos)
+        box = Box(
+            box_type=box_type,
+            description=description,
+            user=user,
+            area=area,
+            destruction_year=destruction_year,
+            name=name,
+            status='open',
+            creation_date=datetime.now()  # Asignar fecha de creación actual
+        )
+
+        
+
+        # Pass the temporary Box object to the preview template
+        return render(request, 'preview_box.html', {'box': box, 'user': user, 'area': area})
+
+    # Redirigir si el método no es POST
+    return redirect("create_box")
+
+
+
+
 
 @login_required
 def save_and_generate_pdf(request):
@@ -486,7 +478,8 @@ def save_and_generate_pdf(request):
     
     user_area = request.user.area
     if request.method == 'POST':
-        box_type_id = request.POST.get('box_type')
+        box_type_id = request.POST.get('box_type_id')
+        print(box_type_id)
         description = request.POST.get('description')
         destruction_year = request.POST.get('destruction_year')
         name=request.POST.get('box_name')
