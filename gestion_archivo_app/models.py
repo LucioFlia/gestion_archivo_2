@@ -136,7 +136,7 @@ class Box(models.Model):
             else:
                 new_number = 1
 
-            self.name = f"{new_number:05d}"
+            self.name = f"{new_number:06d}"
 
         super().save(*args, **kwargs)
 

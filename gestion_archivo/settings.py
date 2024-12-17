@@ -91,3 +91,12 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 HANDLER403 = 'gestion_archivo_app.views.error_403'
+
+# Formato de fecha
+DATE_FORMAT = "d/m/Y"
+
+# Formato de fecha y hora
+DATETIME_FORMAT = "d/m/Y, H:i"
+
+# Activa el uso de formatos locales
+USE_L10N = True

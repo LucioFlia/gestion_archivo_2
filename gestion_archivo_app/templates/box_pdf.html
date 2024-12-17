@@ -28,7 +28,7 @@
         }
 
         .label h1 {
-            font-size: 3rem;
+            font-size: 5rem;
             text-align: center;
             margin: 0;
         }
@@ -64,7 +64,7 @@
             <span>Area:</span> {{ box.area.name }}
         </div>
         <div class="info">
-            <span>Opening Date:</span> {{ box.creation_date }}
+            <span>Opening Date:</span> {{ box.creation_date|date:"d/m/Y, H:i" }}
         </div>
         <div class="info">
             <span>Destruction Year:</span> {{ box.destruction_year }}
@@ -76,7 +76,9 @@
             <span>Box Type:</span> {{ box.box_type }}
         </div>
         <div class="info">
-            <span>Description:</span> {{ box.description }}
+            {% if box.description %}
+                <span>Description:</span> {{ box.description }}
+            {% endif %}
         </div>
     </div>
 
