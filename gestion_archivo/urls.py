@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from gestion_archivo_app.views import main, create_box, create_box_type, create_doc_type, create_box_type_modal, config_keys_values, preview_box, save_and_generate_pdf, check_download_status
+from gestion_archivo_app.views import main, create_box, create_box_type, create_doc_type, create_box_type_modal, config_keys_values,  save_and_generate_pdf, check_download_status
 from gestion_archivo_app.views import add_documentation, create_doc_type_modal, edit_box_documentation,edit_documentation, delete_documentation, login_view, logout_view
 from django.shortcuts import redirect
 from gestion_archivo_app.views import user_list, user_create, user_update, user_delete, user_import
@@ -18,7 +18,7 @@ urlpatterns = [
     path('create/doc-type/', create_doc_type, name='create_doc_type'),
     path('create/box/', create_box, name='create_box'),
     path('config_keys_values/', config_keys_values, name='config_keys_values'),
-    path('preview/box/', preview_box, name='preview_box'),
+    #path('preview/box/', preview_box, name='preview_box'),
     path('save-and-generate-pdf/', save_and_generate_pdf, name='save_and_generate_pdf'),
     path('download/status/', check_download_status, name='check_download_status'),
     path('box/<int:box_id>/add-documentation/', add_documentation, name='add_documentation'),

@@ -120,7 +120,7 @@
                                             </td>
                                         {% else %}
                                             <!--user is admin or archive responsible-->
-                                            <td>User is Archive responsible or admin </td>
+                                            <td class="text-center">User is Archive responsible or admin </td>
                                         {% endif %}
                                         
                                         {% else %}
@@ -140,7 +140,7 @@
                                                 </a>
                                             </td>
                                         {% elif user.role == 'user' %}
-                                            <tdv class="text-center">None (User is user)</td>
+                                            <td class="text-center">None (User is user)</td>
                                         {% else %}
                                         <td class="text-center">User is admin or Archive responsible</td>
                                         {% endif %}

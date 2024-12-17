@@ -9,7 +9,7 @@
             <h4 class="text-center mb-0">Create Box</h4>
         </div>
         <div class="card-body">
-            <form method="post" class="mb-4" action="{% url 'preview_box' %} ">
+            <form method="post" class="mb-4" action="{% url 'create_box' %} ">
                 {% csrf_token %}
                 <div class="mb-3">
                     <label for="name" class="form-label">Name</label>

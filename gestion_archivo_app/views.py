@@ -12,7 +12,6 @@ from django.template.loader import get_template
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.contrib import messages
-from django.http import HttpResponseForbidden
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from functools import wraps
@@ -415,39 +414,20 @@ def config_keys_values(request):
 @login_required
 @user_passes_test_with_message(is_user_or_manager, message="Only users and managers can access this page.")
 def create_box(request):
-    user_area = request.user.area
+    area = request.user.area
+    user = request.user
     box_types = BoxType.objects.all()
     current_year = datetime.now().year
     destruction_years = [(0, 'Never')] + [(year, str(year)) for year in range(current_year, current_year + 25)]
     suggested_year = current_year + 5
 
-    # Initial form display
-    boxes = Box.objects.filter(current_area=user_area, status='open').order_by('-creation_date')
-    return render(request, 'create_box.html', {
-        'box_types': box_types,
-        'destruction_years': destruction_years,
-        'suggested_year': suggested_year,
-        'boxes': boxes,
-        'user_area': user_area
-    })
-
-
-@login_required
-def preview_box(request):
     if request.method == 'POST':
         # Capture form data
         box_type = request.POST.get('box_type')
-        print (box_type)
         description = request.POST.get('description')
         destruction_year = request.POST.get('destruction_year')
-        area = request.user.area
-        user = request.user
         name='to be defined'
-        print (box_type)
-      # Obtener el objeto BoxType
         box_type = get_object_or_404(BoxType, id=box_type)
-
-        # Crear una instancia temporal de Box (sin guardarla en la base de datos)
         box = Box(
             box_type=box_type,
             description=description,
@@ -456,16 +436,22 @@ def preview_box(request):
             destruction_year=destruction_year,
             name=name,
             status='open',
-            creation_date=datetime.now()  # Asignar fecha de creación actual
+            creation_date=datetime.now()  
         )
-
-        
-
         # Pass the temporary Box object to the preview template
         return render(request, 'preview_box.html', {'box': box, 'user': user, 'area': area})
+        # Initial form display
+    
+    boxes = Box.objects.filter(current_area=area, status='open').order_by('-creation_date')
+    return render(request, 'create_box.html', {
+        'box_types': box_types,
+        'destruction_years': destruction_years,
+        'suggested_year': suggested_year,
+        'boxes': boxes,
+        'user_area': area
+    })
 
-    # Redirigir si el método no es POST
-    return redirect("create_box")
+   
 
 
 
@@ -476,15 +462,16 @@ def save_and_generate_pdf(request):
     
     global is_download_ready
     
-    user_area = request.user.area
+    area = request.user.area
+    user = request.user
+
     if request.method == 'POST':
         box_type_id = request.POST.get('box_type_id')
         print(box_type_id)
         description = request.POST.get('description')
         destruction_year = request.POST.get('destruction_year')
         name=request.POST.get('box_name')
-
-          # Retrieve the BoxType object
+       # Retrieve the BoxType object
         box_type = BoxType.objects.get(pk=box_type_id)
         
         try:
@@ -492,10 +479,10 @@ def save_and_generate_pdf(request):
             box = Box.objects.create(
                 box_type=box_type,
                 description=description,
-                user=request.user,
-                area=user_area,  # Assuming the user has an area associated
+                user=user,
+                area=area,  # Assuming the user has an area associated
                 status='open',
-                current_area = user_area,
+                current_area = area,
                 destruction_year = destruction_year,
                 name=name
             )
@@ -509,17 +496,18 @@ def save_and_generate_pdf(request):
                 user=box.user,
                 user_area=box.user.area
             )
-
-        
             path_to_wkhtmltopdf = r"./wkhtmltopdf.exe"
             config = pdfkit.configuration(wkhtmltopdf=path_to_wkhtmltopdf)
+            print(box_fields)
             template = get_template("box_pdf.html")
+
             html = template.render({"box_fields": box_fields})
+
             pdf = pdfkit.from_string(html, False, configuration=config)
             messages.success(request, "The box has been created, and the PDF has been downloaded. Please check your downloads folder.")
-            # Descargar el PDF
+            # Download PDF
             response = HttpResponse(pdf, content_type="application/pdf")
-            response["Content-Disposition"] = f"attachment; filename=box_{box.id}.pdf"
+            response["Content-Disposition"] = f"attachment; filename=box_{box.name}.pdf"
             is_download_ready = True
             return response
             

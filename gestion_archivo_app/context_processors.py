@@ -14,7 +14,7 @@ def system_config(request):
     try:
         config_name_org = SystemConfigKeyValues.objects.get(key="config_name_org").value
     except SystemConfigKeyValues.DoesNotExist:
-        config_name_org = "Define"  # Valor por defecto    
+        config_name_org = "Define config_name_org"  # Valor por defecto    
 
     return {
         "pagination_limit": pagination_limit,

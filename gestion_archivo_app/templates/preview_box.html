@@ -43,10 +43,11 @@
                 <form method="POST" action="{% url 'save_and_generate_pdf' %}" target="_blank">
                     {% csrf_token %}
                     <!-- Hidden fields to pass box data -->
-                    <input type="hidden" name="box_type" value="{{ box.box_type.id }}">
+                    <input type="hidden" name="box_type_id" value="{{ box.box_type.id }}">
                     <input type="hidden" name="description" value="{{ box.description }}">
                     <input type="hidden" name="destruction_year" value="{{ box.destruction_year }}">
-                    <button class="btn btn-primary" type="submit">
+
+                    <button class="btn btn-primary" type="submit" onclick="redirectAfterDownload()">
                         Save & Download PDF <i class="bi bi-arrow-right-circle"></i>
                     </button>
                 </form>
@@ -54,4 +55,29 @@
         </div>
     </div>
 </div>
-{% endblock %}
+<script>
+
+
+    function redirectAfterDownload () {
+         
+           const checkStatus = () => {
+               fetch("{% url 'check_download_status' %}")
+                   .then(response => response.json())
+                   .then(data => {
+                       console.log("CheckStatus of download is:" + data.ready)
+                       if (data.ready) {
+                           window.location.href = "{% url 'main' %}";
+                       } else {
+                           
+                           setTimeout(checkStatus, 1000); 
+                       }
+                   });
+           };
+   
+           // Iniciar la verificación
+           checkStatus();
+          
+       }    
+    
+   </script>
+   {% endblock %}
