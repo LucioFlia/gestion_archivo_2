@@ -123,7 +123,7 @@
                                                 <i class="bi bi-check-circle"></i> Approve Close
                                             </a>
                                         {% elif item.status == 'closed' and user.role == 'manager' %}
-                                            <a href="{% url 'send_box_to_archive' item.id %}" class="btn btn-sm btn-primary">
+                                            <a href="{% url 'send_box_to_archive' item.id %}" class="btn btn-sm btn-primary send-to-archive" >
                                                 <i class="bi bi-send"></i> Send to Archive
                                             </a>
                                         {% elif user.role == 'user' %}
@@ -159,7 +159,16 @@
         </div>
     </div>
 </div>
-
+<script>
+    document.querySelectorAll('.send-to-archive').forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            if (confirm('Are you sure you want to send this box to the archive?')) {
+                window.location.href = this.href;
+            }
+        });
+    });
+</script>
 {% load static %}
 <script src="{% static 'js/table_utils.js' %}?pagination_limit={{ pagination_limit }}"></script>
 {% endblock %}

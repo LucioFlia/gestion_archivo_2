@@ -710,6 +710,7 @@ def approve_close_box(request, box_id):
         user=request.user,
         user_area=request.user.area
     )
+    messages.success(request, 'The box has been approved and is now waiting to be sent to the archive.')
     return redirect('main')
 
 @login_required
