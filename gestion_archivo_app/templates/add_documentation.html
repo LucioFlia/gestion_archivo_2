@@ -27,8 +27,8 @@
                 <div class="mb-3">
                     <label for="doc_type" class="form-label">Document Type</label>
                     <div class="input-group">
-                        <select id="doc_type" name="doc_type" class="form-select" required>
-                            <option value="" disabled selected>Select Type</option>
+                        <select id="doc_type" name="doc_type" class="form-select" required data-placeholder="Document type...">
+                            <option></option>
                             {% for doc_type in doc_types %}
                                 <option value="{{ doc_type.id }}">{{ doc_type.name }}</option>
                             {% endfor %}
