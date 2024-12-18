@@ -1,6 +1,6 @@
-# gestion_master
-<textarea rows="40" cols="80">
-📋 **Resumen de las Funcionalidades Implementadas en el Sistema _gestión_archivo_**
+
+
+📋 **Resumen de las Funcionalidades Implementadas en el Sistema _gestión_archivo_**<br>
 
 1. **Gestión de Usuarios**
    - **Roles**:  
