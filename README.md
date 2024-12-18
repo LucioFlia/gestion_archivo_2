@@ -69,7 +69,7 @@
 
 ✅ **Estado Actual**
 El sistema **gestión_archivo** tiene implementadas las principales funcionalidades para la gestión de usuarios, áreas, cajas, documentación, configuraciones y logs de movimiento, con una interfaz robusta y fácil de usar gracias a **Bootstrap** y **JavaScript**.
-</textarea>
+
 
 
 
