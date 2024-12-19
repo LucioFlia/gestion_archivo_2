@@ -137,6 +137,7 @@
             }
         });
         
+        //use select2 library w
         $(function () {
             $('select').each(function () {
               $(this).select2({
@@ -150,6 +151,65 @@
             });
           });
     </script>
+
+{% block modals %}
+
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                Are you sure you want to delete this item?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="#" id="confirmDeleteLink" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Confirm Delete
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    /**
+     * Function to open a generic delete confirmation modal.
+     * @param {string} itemName - The name of the item to be deleted.
+     * @param {string} deleteUrl - The URL to perform the delete action.
+     * @param {string} message - The custom message to display in the modal.
+     */
+    function openDeleteModal(itemName, deleteUrl, message) {
+        document.getElementById('modalBody').innerHTML = message.replace('{item}', `<strong>${itemName}</strong>`);
+        document.getElementById('confirmDeleteLink').setAttribute('href', deleteUrl);
+        var modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+        modal.show();
+    }
+</script>
+
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                Are you sure you want to delete this item?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="#" id="confirmDeleteLink" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Confirm Delete
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
    
 </body>
 </html>

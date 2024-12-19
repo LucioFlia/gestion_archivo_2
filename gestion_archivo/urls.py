@@ -17,7 +17,6 @@ urlpatterns = [
     path('create/doc-type/', create_doc_type, name='create_doc_type'),
     path('create/box/', create_box, name='create_box'),
     path('config_keys_values/', config_keys_values, name='config_keys_values'),
- 
     path('save-and-generate-pdf/', save_and_generate_pdf, name='save_and_generate_pdf'),
     path('download/status/', check_download_status, name='check_download_status'),
     path('box/<int:box_id>/add-documentation/', add_documentation, name='add_documentation'),
