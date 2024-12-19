@@ -53,13 +53,13 @@
                     <input type="number" id="sheets" name="sheets" class="form-control" value="{{ documentation.sheets }}" required>
                     <div class="invalid-feedback">Please enter the number of sheets.</div>
                 </div>
-
-                <button type="submit" class="btn btn-success">
-                    <i class="bi bi-save"></i> Save Changes
-                </button>
                 <a href="{% url 'edit_box_documentation' box.id %}" class="btn btn-secondary ms-2">
                     <i class="bi bi-arrow-left"></i> Back to Documentation List
                 </a>
+                <button type="submit" class="btn btn-success" id="saveButton" disabled>
+                    <i class="bi bi-save" ></i> Save Changes
+                </button>
+
 
             </form>
         </div>
@@ -81,5 +81,34 @@
             }, false);
         });
     })();
+</script>
+
+<!-- enable / disable button save-->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('.needs-validation');
+        const saveButton = document.getElementById('saveButton');
+        const originalFormData = new FormData(form);
+
+        // Function to compare form data
+        function hasFormChanged() {
+            const currentFormData = new FormData(form);
+            for (let key of currentFormData.keys()) {
+                if (currentFormData.get(key) !== originalFormData.get(key)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Enable the save button if any change is detected
+        form.addEventListener('input', function () {
+            saveButton.disabled = !hasFormChanged();
+        });
+
+        form.addEventListener('change', function () {
+            saveButton.disabled = !hasFormChanged();
+        });
+    });
 </script>
 {% endblock %}

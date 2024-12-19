@@ -1,15 +1,22 @@
 {% extends "base.html" %}
 
-{% block title %}Edit Box Documentation{% endblock %}
+{% block title %}Box Documentation{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
     <div class="card shadow">
         <div class="card-header bg-primary text-white">
-            <h4 class="text-center mb-0">Documentation for Box: {{ box.name }}</h4>
+            <h4 class="text-center mb-0">Documentation for Box: {{ box.name }} </h4>
         </div>
         <div class="card-body">
-            <table class="table table-striped table-bordered">
+                                <!-- Search Field -->
+                                <div class="mb-3">
+                                    <div class="input-group">
+                                        <input type="text" id="searchInputId" class="form-control" placeholder="Search Documentations...">
+                                        <button type="button" class="btn btn-secondary" onclick="clearSearch()">Clear</button>
+                                    </div>
+                                </div>
+            <table class="table table-striped table-bordered" id="tableId">
                 <thead>
                     <tr>
                         <th>CUIT Number</th>
@@ -17,11 +24,15 @@
                         <th>Document Type</th>
                         <th>Description</th>
                         <th>Corpus</th>
-                        <th>Number of Sheets</th>
+                        <th>Number of Sheets </th>
+                        
+                        {% if can_manage_box %}
+
                         <th>Actions</th>
+                        {% endif %}
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tableBodyId">
                     {% for doc in documentations %}
                         <tr>
                             <td>{{ doc.cuit_number }}</td>
@@ -30,6 +41,7 @@
                             <td>{{ doc.description }}</td>
                             <td>{{ doc.corpus }}</td>
                             <td>{{ doc.sheets }}</td>
+                            {% if can_manage_box %}
                             <td class="text-center">
                                 <a href="{% url 'edit_documentation' box.id doc.id %}" class="btn btn-sm btn-warning">
                                     <i class="bi bi-pencil-square"></i> Edit
@@ -38,6 +50,7 @@
                                     <i class="bi bi-trash"></i> Delete
                                 </a>
                             </td>
+                            {% endif %}
                         </tr>
                     {% empty %}
                         <tr>
@@ -46,15 +59,29 @@
                     {% endfor %}
                 </tbody>
             </table>
+            <div id="noRecordsMessage" class="text-center my-3" style="display: none;">
+                <p class="text-muted">No records available</p>
+            </div>
+                             <!-- Pagination Controls -->
+                             <nav class="mt-3">
+                                <ul class="pagination justify-content-center" id="tableBodyIdPagination">
+                                    <!-- Pagination will be dynamically generated -->
+                                </ul>
+                            </nav>
             <div class="d-flex gap-2 mt-4">
-                <a href="{% url 'add_documentation' box.id %}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Add Documentation
-                </a>
                 <a href="{% url 'main' %}" class="btn btn-secondary">
                     <i class="bi bi-arrow-left"></i> Back to Main
                 </a>
+                {% if can_manage_box %}
+                <a href="{% url 'add_documentation' box.id %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add Documentation
+                </a>
+                {% endif %}
+
             </div>
         </div>
     </div>
 </div>
+{% load static %}
+<script src="{% static 'js/table_utils.js' %}?pagination_limit={{ pagination_limit }}"></script>
 {% endblock %}

@@ -20,7 +20,7 @@ class DocTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Box)
 class BoxAdmin(admin.ModelAdmin):
-    list_display = ('box_type', 'description')
+    list_display = ('id', 'name', 'box_type', 'description', 'destruction_year', 'area', 'status', 'creation_date', 'update_date')
 
 @admin.register(Documentation)
 class DocumentationAdmin(admin.ModelAdmin):

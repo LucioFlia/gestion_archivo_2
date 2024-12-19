@@ -239,7 +239,7 @@ def login_view(request):
         
         if user is not None:
             login(request, user)
-            return redirect('main')  # Cambia 'main' por la vista principal de tu sistema
+            return redirect('main') 
         else:
             return render(request, "login.html", {"error": "Invalid username or password"})
 
@@ -362,7 +362,7 @@ def main(request):
     
     return render(request, "main.html", {"items": items})
 
-# Variable global para indicar si la descarga está lista (podría usarse una solución más robusta como un cache)
+# Variable global para indicar si la descarga está lista 
 is_download_ready = False
 
 @login_required
@@ -588,10 +588,12 @@ def edit_box_documentation(request, box_id):
     """
     box = get_object_or_404(Box, id=box_id)
     documentations = box.documentations.all()  
-
+    can_manage_box = box.status == 'open' and (request.user.role == 'manager' or request.user.role == 'user')
+    print(can_manage_box)
     return render(request, "edit_box_documentation.html", {
         "box": box,
         "documentations": documentations,
+        "can_manage_box": can_manage_box
     })
 
 
@@ -640,11 +642,12 @@ def edit_documentation(request, box_id, doc_id):
             
             messages.success(request, "The documentation was updated.")
             return redirect("edit_box_documentation", box_id=box.id)
-
+ 
     return render(request, "edit_documentation.html", {
         "box": box,
         "documentation": documentation,
         "doc_types": doc_types,
+ 
     })
 
 
@@ -681,7 +684,7 @@ def delete_documentation(request, doc_id):
 def request_close_box(request, box_id):
     box = get_object_or_404(Box, id=box_id)
     if box.status == 'open':
-        box.status = 'waiting_for_close'
+        box.status = 'waiting_close'
         box.save()
     
         BoxLog.objects.create(
@@ -698,7 +701,8 @@ def request_close_box(request, box_id):
 @login_required
 def approve_close_box(request, box_id):
     box = get_object_or_404(Box, id=box_id)
-    if box.status == 'waiting_for_close' and request.user.role == 'manager':
+
+    if box.status == 'waiting_close' and request.user.role == 'manager':
         box.status = 'closed'
         box.save()
         BoxLog.objects.create(
@@ -710,19 +714,59 @@ def approve_close_box(request, box_id):
         user=request.user,
         user_area=request.user.area
     )
-    messages.success(request, 'The box has been approved and is now waiting to be sent to the archive.')
+        messages.success(request, 'The box has been approved and is now waiting to be sent to the archive.')
+    else:
+        messages.error(request, 'You have not permission to approve close.')
+
     return redirect('main')
+
+
+
+@login_required
+def reject_box_close(request, box_id):
+    box = get_object_or_404(Box, id=box_id)
+  
+    if request.method == 'POST' and box.status == 'waiting_close' and request.user.role == 'manager':
+        rejection_reason = request.POST.get('rejection_reason')
+
+        # Capture the previous status before updating
+        previous_status = box.status
+
+        # Update the box status to 'open'
+        box.status = 'open'
+        box.save()
+
+        # Log the rejection in BoxLog
+        BoxLog.objects.create(
+            log_type='status_change',
+            box=box,
+            previous_status=previous_status,
+            new_status=box.status,
+            observations=f'Closure rejected: {rejection_reason}',
+            user=request.user,
+            user_area=request.user.area
+        )
+
+        messages.success(request, f'The closure of box "{box.name}" was successfully rejected.')
+    else:
+        messages.error(request, 'You do not have permission to perform this action.')
+
+    return redirect('main')
+
+
+
 
 @login_required
 def send_box_to_archive(request, box_id):
     box = get_object_or_404(Box, id=box_id)
     if box.status == 'closed' and request.user.role == 'manager':
+        previous_status = box.status
         box.status = 'waiting_archive'
         box.save()
         BoxLog.objects.create(
             log_type='status_change',
             box=box,
-            previous_status=box.status,
+            previous_status=previous_status,
             new_status=box.status,
             observations='Box sent to archive.',
             user=request.user,

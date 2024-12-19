@@ -79,6 +79,9 @@ class BoxType(models.Model):
     def __str__(self):
         return self.name
 
+def get_current_year():
+    return  datetime.now().year
+
 class Box(models.Model):
     STATUS_CHOICES = [
         ('open', 'Open'),
@@ -101,10 +104,10 @@ class Box(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True, verbose_name="Creation Date")
     update_date =  models.DateTimeField(auto_now=True)
     close_date = models.DateTimeField(blank=True, null=True, default=None, verbose_name="Close Date")
-    current_year = datetime.now().year
+    
 
     destruction_year = models.PositiveSmallIntegerField(
-        choices=[(0,'Never')] + [(year, str(year)) for year in range(current_year, current_year + 500)],
+        choices=[(0,'Never')] + [(year, str(year)) for year in range(get_current_year(), get_current_year() + 500)],
         verbose_name="Destruction Year"
     )
     current_area = models.ForeignKey(Area, on_delete=models.PROTECT, related_name="current_boxes", verbose_name="Current Area")
@@ -142,6 +145,8 @@ class Box(models.Model):
 
     def __str__(self):
         return f"Box ({self.box_type.name}) - {self.status}"
+    
+
 
 
 
@@ -193,15 +198,15 @@ class BoxLog(models.Model):
         ('area_change', 'Area Changed'),
     ]
     log_type = models.CharField(max_length=20, choices=LOG_TYPE_CHOICES)
-    box = models.ForeignKey("Box", on_delete=models.PROTECT, related_name="logs")
-    area_origin = models.ForeignKey("Area", on_delete=models.PROTECT, null=True, blank=True, related_name="origin_logs")
-    area_destination = models.ForeignKey("Area", on_delete=models.PROTECT, null=True, blank=True, related_name="destination_logs")
+    box = models.ForeignKey("Box", on_delete=models.CASCADE, related_name="logs")
+    area_origin = models.ForeignKey("Area", on_delete=models.CASCADE, null=True, blank=True, related_name="origin_logs")
+    area_destination = models.ForeignKey("Area", on_delete=models.CASCADE, null=True, blank=True, related_name="destination_logs")
     doc_added = models.ForeignKey("Documentation", on_delete=models.SET_NULL, null=True, blank=True, related_name="logs_added")  
     doc_removed = models.ForeignKey("Documentation", on_delete=models.SET_NULL, null=True, blank=True, related_name="logs_removed")  
     previous_status = models.CharField(max_length=50, null=False, blank=False)
     new_status = models.CharField(max_length=50, null=False, blank=False)
     observations = models.TextField(blank=True, null=True)
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     user_area = models.ForeignKey("Area", on_delete=models.PROTECT, related_name="user_logs")
     log_date = models.DateTimeField(auto_now_add=True)
 

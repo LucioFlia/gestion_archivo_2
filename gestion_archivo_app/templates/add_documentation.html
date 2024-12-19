@@ -3,7 +3,7 @@
 {% block title %}Add Documentation{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4">
+<div class="container mt-5">
     <div class="card shadow">
         <div class="card-header bg-primary text-white">
             <h4 class="text-center mb-0">Add Documentation to Box: {{ box.name }}</h4>
@@ -56,16 +56,17 @@
                     <input type="number" id="sheets" name="sheets" class="form-control" required>
                     <div class="invalid-feedback">Please enter the number of sheets.</div>
                 </div>
-
-                <button type="submit" name="save_and_continue" class="btn btn-primary">
-                    <i class="bi bi-arrow-repeat"></i> Save and Continue
-                </button>
-                <button type="submit" name="save_and_exit" class="btn btn-success">
-                    <i class="bi bi-check-circle"></i> Save and Exit
-                </button>
                 <a href="{% url 'edit_box_documentation' box.id %}" class="btn btn-secondary ms-2">
                     <i class="bi bi-arrow-left"></i> Back
                 </a>
+
+                <button type="submit" name="save_and_exit" class="btn btn-success">
+                    <i class="bi bi-check-circle"></i> Save and Exit
+                </button>
+                <button type="submit" name="save_and_continue" class="btn btn-primary">
+                    <i class="bi bi-arrow-repeat"></i> Save and Continue
+                </button>
+
             </form>
         </div>
     </div>

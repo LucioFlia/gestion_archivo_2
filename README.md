@@ -1,6 +1,23 @@
 
 
-📋 **Resumen de las Funcionalidades Implementadas en el Sistema _gestión_archivo_**<br>
+EL depósito de Logísitca (deposito al que van las cajas al hacer "send to archive") es el área del AR cuyo depósito es el mismo del usuario.
+
+usuario -> tiene un area de revista y un depósito en donde luego de todo el flujo de movimientos la caja es archivada
+
+AR ->  su área de revista es el depósito intermedio en donde quedan las cajas que él debe fajar y rotular para luego enviarlas al Archivo
+
+todos los AR que tengan un deposito B deben tener como área la misma área A, entonces al "llegar" una caja al depósito intermedio A, cualquier AR puede tramitar el envío al archivo definitivo.
+
+falta implementar reject close
+y reject send to archive
+
+Botones "negativos" pegados a la izquierda de los "positivos"
+"volver" el primero a la izquierda
+todos deberían estar alineados a la derecha
+
+TODO: si elijo preview box y hago back no se carga el select con la opción que había elegido 
+
+**Resumen de las Funcionalidades Implementadas en el Sistema _gestión_archivo_**<br>
 
 1. **Gestión de Usuarios**
    - **Roles**:  
