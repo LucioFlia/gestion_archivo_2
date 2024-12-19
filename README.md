@@ -16,6 +16,8 @@ Botones "negativos" pegados a la izquierda de los "positivos"
 todos deberían estar alineados a la derecha
 
 TODO: si elijo preview box y hago back no se carga el select con la opción que había elegido 
+      capturar las excepciones en los delete
+      Hacer un dialogo modal mas genérico (quizá con un tercer parámetro para el string de la question)
 
 **Resumen de las Funcionalidades Implementadas en el Sistema _gestión_archivo_**<br>
 
