@@ -125,6 +125,7 @@
     </footer>
     <script>
         // Wait for the DOM to load
+        // fade off messages 
         document.addEventListener("DOMContentLoaded", function () {
             const messagesContainer = document.getElementById("messages-container");
             if (messagesContainer) {
@@ -137,7 +138,7 @@
             }
         });
         
-        //use select2 library w
+        //use select2 library 
         $(function () {
             $('select').each(function () {
               $(this).select2({
@@ -153,62 +154,57 @@
     </script>
 
 {% block modals %}
-
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+<!-- Parametrized Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Deletion</h5>
+                <h5 class="modal-title" id="confirmModalLabel">Confirmation</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" id="modalBody">
-                Are you sure you want to delete this item?
+            <div class="modal-body" id="confirmModalMessage">
+                Are you sure you want to proceed - this message shall never appears
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <a href="#" id="confirmDeleteLink" class="btn btn-danger">
-                    <i class="bi bi-trash"></i> Confirm Delete
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </button>
+                <a href="#" id="confirmModalAction" class="btn">
+                    <i class="bi" id="confirmModalIcon"></i> <span id="confirmModalButtonText">Confirm</span>
                 </a>
             </div>
         </div>
     </div>
 </div>
-
-
 <script>
-    /**
-     * Function to open a generic delete confirmation modal.
-     * @param {string} itemName - The name of the item to be deleted.
-     * @param {string} deleteUrl - The URL to perform the delete action.
-     * @param {string} message - The custom message to display in the modal.
-     */
-    function openDeleteModal(itemName, deleteUrl, message) {
-        document.getElementById('modalBody').innerHTML = message.replace('{item}', `<strong>${itemName}</strong>`);
-        document.getElementById('confirmDeleteLink').setAttribute('href', deleteUrl);
-        var modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+    function openConfirmModal(message, actionUrl, buttonType, buttonText) {
+        // Set the message
+        document.getElementById('confirmModalMessage').innerHTML = message;
+
+        // Set the URL for the action button
+        const actionButton = document.getElementById('confirmModalAction');
+        actionButton.setAttribute('href', actionUrl);
+
+        // Set button style and icon based on buttonType
+        if (buttonType === 'danger') {
+            actionButton.className = 'btn btn-danger';
+            document.getElementById('confirmModalIcon').className = 'bi bi-trash';
+        } else if (buttonType === 'success') {
+            actionButton.className = 'btn btn-success';
+            document.getElementById('confirmModalIcon').className = 'bi bi-check-circle';
+        }
+
+        // Set the button text
+        document.getElementById('confirmModalButtonText').innerText = buttonText;
+
+        // Show the modal
+        var modal = new bootstrap.Modal(document.getElementById('confirmModal'));
         modal.show();
     }
 </script>
 
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Deletion</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="modalBody">
-                Are you sure you want to delete this item?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <a href="#" id="confirmDeleteLink" class="btn btn-danger">
-                    <i class="bi bi-trash"></i> Confirm Delete
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
+
+
 {% endblock %}
    
 </body>

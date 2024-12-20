@@ -48,13 +48,14 @@
                                     <i class="bi bi-pencil-square"></i> Edit
                                 </a>
 
-                                <button type="button" class="btn btn-sm btn-danger" onclick="openDeleteModal('{{ doc.name }}', '{% url 'delete_documentation' doc.id %}')">
+                           
+                                
+                                <button type="button" class="btn btn-sm btn-danger" 
+                                    onclick="openConfirmModal('Are you sure you want to delete the docum6yent <strong>{{ doc.name }}</strong>?', 
+                                    '{% url 'delete_documentation' doc.id %}', 'danger', 'Delete')">
                                     <i class="bi bi-trash"></i> Delete
                                 </button>
                                 
-                                <!--a href="{% url 'delete_documentation' doc.id %}" class="btn btn-sm btn-danger">
-                                    <i class="bi bi-trash"></i> Delete
-                                </a-->
                             </td>
                             {% endif %}
                         </tr>
@@ -92,33 +93,4 @@
 
 {% load static %}
 <script src="{% static 'js/table_utils.js' %}?pagination_limit={{ pagination_limit }}"></script>
-{% block modals %}
-<script>
-    function openDeleteModal(docName, deleteUrl) {
-        document.getElementById('modalBody').innerHTML = `Are you sure you want to delete the document <strong>${docName}</strong>?`;
-        document.getElementById('confirmDeleteLink').setAttribute('href', deleteUrl);
-        var modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-        modal.show();
-    }
-</script>
-    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Deletion</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="modalBody">
-                    Are you sure you want to delete this document?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <a href="#" id="confirmDeleteLink" class="btn btn-danger">
-                        <i class="bi bi-trash"></i> Confirm Delete
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-{% endblock %}
 {% endblock %}
