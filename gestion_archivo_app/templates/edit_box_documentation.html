@@ -47,11 +47,10 @@
                                 <a href="{% url 'edit_documentation' box.id doc.id %}" class="btn btn-sm btn-warning">
                                     <i class="bi bi-pencil-square"></i> Edit
                                 </a>
-
-                           
+             
                                 
                                 <button type="button" class="btn btn-sm btn-danger" 
-                                    onclick="openConfirmModal('Are you sure you want to delete the docum6yent <strong>{{ doc.name }}</strong>?', 
+                                    onclick="openConfirmModal('Are you sure you want to delete the document <strong>{{ doc.name }}</strong>?', 
                                     '{% url 'delete_documentation' doc.id %}', 'danger', 'Delete')">
                                     <i class="bi bi-trash"></i> Delete
                                 </button>

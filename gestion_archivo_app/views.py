@@ -261,7 +261,6 @@ def logout_view(request):
 @login_required
 def create_box_type(request):
     # Handle deletion
-    
     if 'delete_id' in request.GET:
         try:
             delete_id = request.GET.get('delete_id')
@@ -328,18 +327,26 @@ def create_doc_type_modal(request):
 def create_doc_type(request):
     # Handle deletion
     if 'delete_id' in request.GET:
-        delete_id = request.GET.get('delete_id')
-        doc_type = get_object_or_404(DocType, id=delete_id)
-        doc_type.delete()
-        return redirect('create_doc_type')  # Redirect to refresh the list
+        try:
+            delete_id = request.GET.get('delete_id')
+            doc_type = get_object_or_404(DocType, id=delete_id)
+            doc_type.delete()
+            return redirect('create_doc_type')  # Redirect to refresh the list
+        except Exception as e:
+            messages.error(request, f"Error: {str(e)}")
+            return redirect('create_doc_type')
 
     # Handle form submission
     if request.method == 'POST':
-        name = request.POST.get('name')
-        description = request.POST.get('description')
+        try:
+            name = request.POST.get('name')
+            description = request.POST.get('description')
 
-        if name:  # Validate input
-            DocType.objects.create(name=name, description=description)
+            if name:  # Validate input
+                DocType.objects.create(name=name, description=description)
+                return redirect('create_doc_type')
+        except Exception as e:
+            messages.error(request, f"Error: {str(e)}")
             return redirect('create_doc_type')
 
     # Fetch all DocType objects

@@ -60,10 +60,13 @@
                             <td>{{ item.name }}</td>
                             <td>{{ item.description }}</td>
                             <td class="text-center">
-                                <a href="?delete_id={{ item.id }}" class="btn btn-danger btn-sm"
-                                   onclick="return confirm('Are you sure you want to delete this box type?');">
-                                   <i class="bi bi-trash"></i> Delete
-                                </a>
+
+                                <button type="button" class="btn btn-sm btn-danger" 
+                                    onclick="openConfirmModal('Are you sure you want to delete the box type <strong>{{ item.name }}</strong>?', 
+                                    '?delete_id={{ item.id }}', 'danger', 'Delete')">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+
                             </td>
                         </tr>
                         {% endfor %}

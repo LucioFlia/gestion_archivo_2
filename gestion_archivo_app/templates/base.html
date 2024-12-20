@@ -176,6 +176,7 @@
         </div>
     </div>
 </div>
+
 <script>
     function openConfirmModal(message, actionUrl, buttonType, buttonText) {
         // Set the message
@@ -201,9 +202,68 @@
         var modal = new bootstrap.Modal(document.getElementById('confirmModal'));
         modal.show();
     }
+        function openConfirmModalWithForm(message, actionUrl, buttonType, buttonText) {
+            // Set the message
+            document.getElementById('confirmModalMessage').innerHTML = `
+                <p>${message}</p>
+                <div class="mb-3">
+                    <label for="rejectionReason" class="form-label">Reason for Rejection</label>
+                    <textarea class="form-control" name="rejection_reason" id="rejectionReason" rows="3" required></textarea>
+                </div>
+            `;
+    
+            // Set the URL for the form action
+            const actionButton = document.getElementById('confirmModalAction');
+            actionButton.setAttribute('onclick', `submitRejectionForm('${actionUrl}')`);
+    
+            // Set button style and icon based on buttonType
+            if (buttonType === 'danger') {
+                actionButton.className = 'btn btn-danger';
+                document.getElementById('confirmModalIcon').className = 'bi bi-x-circle';
+            } else if (buttonType === 'success') {
+                actionButton.className = 'btn btn-success';
+                document.getElementById('confirmModalIcon').className = 'bi bi-check-circle';
+            }
+    
+            // Set the button text
+            document.getElementById('confirmModalButtonText').innerText = buttonText;
+    
+            // Show the modal
+            var modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            modal.show();
+        }
+    
+        function submitRejectionForm(actionUrl) {
+            const reason = document.getElementById('rejectionReason').value;
+            if (reason.trim() === "") {
+                alert('Please provide a reason for rejection.');
+                return;
+            }
+    
+            // Create a form dynamically
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = actionUrl;
+    
+            // CSRF token
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = 'csrfmiddlewaretoken';
+            csrfToken.value = '{{ csrf_token }}';
+            form.appendChild(csrfToken);
+    
+            // Rejection reason
+            const rejectionInput = document.createElement('input');
+            rejectionInput.type = 'hidden';
+            rejectionInput.name = 'rejection_reason';
+            rejectionInput.value = reason;
+            form.appendChild(rejectionInput);
+    
+            document.body.appendChild(form);
+            form.submit();
+        }
+    
 </script>
-
-
 
 {% endblock %}
    
