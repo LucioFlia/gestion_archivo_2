@@ -4,7 +4,7 @@ from gestion_archivo_app.views import main, create_box, create_box_type, create_
 from gestion_archivo_app.views import add_documentation, create_doc_type_modal, edit_box_documentation,edit_documentation, delete_documentation, login_view, logout_view
 from django.shortcuts import redirect
 from gestion_archivo_app.views import user_list, user_create, user_update, user_delete, user_import, reject_box_close
-from gestion_archivo_app.views import area_list, area_create, area_update, area_delete, area_import, request_close_box, approve_close_box, send_box_to_archive, box_logs
+from gestion_archivo_app.views import area_list, area_create, area_update, area_delete, area_import, request_close_box, approve_close_box, send_box_to_archive, box_logs, save_and_generate_security_seal
 
 
 urlpatterns = [
@@ -40,6 +40,7 @@ urlpatterns = [
     path("box/<int:box_id>/send-to-archive/", send_box_to_archive, name="send_box_to_archive"),
     path('box/<int:box_id>/logs/', box_logs, name='box_logs'),
     path('box/<int:box_id>/reject-close/', reject_box_close, name='reject_box_close'),
+    path("box/<int:box_id>/save_and_generate_security_seal/", save_and_generate_security_seal, name="save_and_generate_security_seal"),
 
 
 ]

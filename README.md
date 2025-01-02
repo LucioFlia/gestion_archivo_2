@@ -19,6 +19,11 @@ TODO: si elijo preview box y hago back no se carga el select con la opción que 
       capturar las excepciones en los delete
       Hacer un dialogo modal mas genérico (quizá con un tercer parámetro para el string de la question)
 
+FUNCIONALIDAD: al aprobar al cierre de la caja se generan las fajas con el nombre del creador de la caja, del jefe que aprobó el cierre y un espacio para la firma del RA.
+Cuando el RA lo recibe (caja ya cerrada) firma y acepta la caja, que queda en el área de Logística (área del RA), luego, cualquier RA del Depósito Logística lo puede enviar a depósito Lamadrid.
+
+El circuito de reapertura de caja lo solicita el Jefe de Área sistemicamente y (por mail?) la caja pasa de depósito Lamadrid al Area solicitante en donde se ro
+
 **Resumen de las Funcionalidades Implementadas en el Sistema _gestión_archivo_**<br>
 
 1. **Gestión de Usuarios**

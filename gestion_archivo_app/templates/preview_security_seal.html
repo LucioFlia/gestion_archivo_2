@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Preview Box{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white text-center">
+            <h4 class="mb-0">{{ config_name_org }}</h4>
+        </div>
+        <div class="card-body">
+
+            <!-- Box Information -->
+            <div class="mb-3">
+                <span class="fw-bold">BOX TYPE:</span> {{ box.box_type.name }}
+            </div>
+
+            <div class="mb-3">
+                <span class="fw-bold">AREA:</span> {{ area.name }}
+            </div>
+
+            <div class="mb-3">
+                <span class="fw-bold">OPENING DATE:</span> {{ box.creation_date|date:"d/m/Y" }}
+            </div>
+
+            <div class="mb-3">
+                <span class="fw-bold">DESTRUCTION YEAR:</span> {{ box.destruction_year }}
+            </div>
+
+            <div class="mb-3">
+                <span class="fw-bold">RESPONSIBLE:</span> {{ box.user.last_name }}, {{ box.user.first_name }}
+            </div>
+
+            <div class="mb-3">
+                <span class="fw-bold">DESCRIPTION:</span> {{ box.description }}
+            </div>
+
+            
+            <div class="mb-3">
+                <span class="fw-bold">MANAGER:</span> {{ user.last_name }}, {{ user.first_name }}
+            </div>
+
+            <!-- Buttons -->
+            <div class="d-flex gap-2 mt-4">
+
+                <button type="button" class="btn btn-secondary"  onclick="window.history.back()">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </button>
+                <form method="POST" action="{% url 'save_and_generate_security_seal' box.id %}" target="_blank">
+                    {% csrf_token %}
+                    <!-- Hidden fields to pass box data -->
+                    <button class="btn  btn-success" type="submit" onclick="redirectAfterDownload()">
+                        <i class="bi bi-check-circle" ></i> Approve & Download Security Seal
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+
+    function redirectAfterDownload () {
+         
+           const checkStatus = () => {
+               fetch("{% url 'check_download_status' %}")
+                   .then(response => response.json())
+                   .then(data => {
+                       console.log("CheckStatus of download is:" + data.ready)
+                       if (data.ready) {
+                           window.location.href = "{% url 'main' %}";
+                       } else {
+                           
+                           setTimeout(checkStatus, 1000); 
+                       }
+                   });
+           };
+   
+           // Iniciar la verificación
+           checkStatus();
+          
+       }    
+    
+   </script>
+   {% endblock %}

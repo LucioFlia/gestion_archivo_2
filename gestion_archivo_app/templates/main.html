@@ -124,10 +124,13 @@
                                                 Document has shets, User is AR or Admin
                                             {% endif %}
                                         {% elif item.status == 'waiting_close' and user.role == 'manager' %}
-                                           <!-- box has sheets and is waiting_close and user is manager -->  
-                                               <a href="{% url 'approve_close_box' item.id %}" class="btn btn-sm btn-success approve-close">
-                                                <i class="bi bi-check-circle"></i> Approve Close
-                                            </a>
+                                  
+                                        <a href="{% url 'approve_close_box' item.id %}" class="btn btn-sm btn-success approve-close">
+                                            <i class="bi bi-check-circle"></i> Approve Close
+                                        </a>
+                                                
+                                                
+                                      
                                             <!-- Modal for rejecting the box closure -->
                                             <button type="button" class="btn btn-danger btn-sm" onclick="openConfirmModalWithForm('Are you sure you want to reject the closure of box <strong>{{item.name}}</strong>?', '{% url 'reject_box_close' item.id %}', 'danger', 'Reject Close')">
                                                 <i class="bi bi-x-circle"></i> Reject Close
@@ -194,14 +197,7 @@
             }
         });
     });
-    document.querySelectorAll('.approve-close').forEach(link => {
-        link.addEventListener('click', function (e) {
-            e.preventDefault();
-            if (confirm('Are you sure you want to approve close this box?')) {
-                window.location.href = this.href;
-            }
-        });
-    });
+
 </script>
 {% load static %}
 <script src="{% static 'js/table_utils.js' %}?pagination_limit={{ pagination_limit }}"></script>

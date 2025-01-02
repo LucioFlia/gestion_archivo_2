@@ -5,15 +5,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse, JsonResponse
-from django.core.paginator import Paginator
-from django.core.exceptions import PermissionDenied
-from django.urls import reverse
+
+
 from django.template.loader import get_template
 from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
+
 from django.contrib import messages
 from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
 from functools import wraps
 import pdfkit
 
@@ -198,7 +196,7 @@ def user_update(request, user_id):
     return render(request, "user_update.html", {"user_aux": userd, "areas": areas, "roles": ROLE_CHOICES})
 
 
-#return render(request, "user_update.html", {"user": user, "areas": areas})
+
 @login_required
 @user_passes_test_with_message(is_admin, "Only the admin can access this page.")
 def user_delete(request, user_id):
@@ -380,6 +378,7 @@ def check_download_status(request):
     response = JsonResponse({"ready": is_download_ready})
     is_download_ready = False
     return response
+
 @login_required
 def config_keys_values(request):
     configs = SystemConfigKeyValues.objects.all()
@@ -421,6 +420,7 @@ def config_keys_values(request):
 
 @login_required
 @user_passes_test_with_message(is_user_or_manager, message="Only users and managers can access this page.")
+
 def create_box(request):
     area = request.user.area
     user = request.user
@@ -523,6 +523,76 @@ def save_and_generate_pdf(request):
         except Exception as e:
             messages.error(request, f"Error: {str(e)}")
     return redirect("create_box")
+
+@login_required
+def save_and_generate_security_seal(request, box_id):
+    global is_download_ready
+    box = get_object_or_404(Box, id=box_id)
+    
+    area = request.user.area
+    user = request.user
+
+    if request.method == 'POST':
+        '''
+        try:
+            # Create the box
+            box = Box.objects.create(
+                box_type=box_type,
+                description=description,
+                user=user,
+                area=area,  # Assuming the user has an area associated
+                status='open',
+                current_area = area,
+                destruction_year = destruction_year,
+                name=name
+            )
+            box_fields = {k: v for k, v in box.__dict__.items() if not k.startswith("_")}
+            
+            BoxLog.objects.create(
+                log_type='new',
+                box=box,
+                previous_status='N/A',
+                new_status=box.status,
+                observations='Box created',
+                user=box.user,
+                user_area=box.user.area
+            )
+            '''
+        #temporal para probar la generacion de la faja
+        box.status = 'closed'
+        box.close_date = datetime.now()  
+        box.save()
+        BoxLog.objects.create(
+        log_type='status_change',
+        box=box,
+        previous_status=box.status,
+        new_status=box.status,
+        observations='Box closure approved.',
+        user=request.user,
+        user_area=request.user.area
+        )
+        options = {
+        'page-size': 'A4',
+        'orientation': 'Landscape',  # Forzar apaisado
+        'encoding': 'UTF-8',
+        'no-outline': None,
+        'margin-top': '10mm',
+        'margin-right': '10mm',
+        'margin-bottom': '10mm',
+        'margin-left': '10mm',
+        }
+        path_to_wkhtmltopdf = r"./wkhtmltopdf.exe"
+        config = pdfkit.configuration(wkhtmltopdf=path_to_wkhtmltopdf)
+        template = get_template("box_security_seal_pdf.html")
+        html = template.render({"box": box, "area": request.user.area, "user": request.user})
+        pdf = pdfkit.from_string(html, False, configuration=config, options=options)
+        messages.success(request, 'The box has been approved and is now waiting to be sent to the archive.')
+        # Download PDF
+        response = HttpResponse(pdf, content_type="application/pdf")
+        response["Content-Disposition"] = f"attachment; filename=security_seal_box_{box.name}.pdf"
+        is_download_ready = True
+        return response
+    return redirect("main")
 
 
 
@@ -710,20 +780,10 @@ def approve_close_box(request, box_id):
     box = get_object_or_404(Box, id=box_id)
 
     if box.status == 'waiting_close' and request.user.role == 'manager':
-        box.status = 'closed'
-        box.save()
-        BoxLog.objects.create(
-        log_type='status_change',
-        box=box,
-        previous_status=box.status,
-        new_status=box.status,
-        observations='Box closure approved.',
-        user=request.user,
-        user_area=request.user.area
-    )
-        messages.success(request, 'The box has been approved and is now waiting to be sent to the archive.')
+        return render(request, 'preview_security_seal.html', {'box': box, 'user': request.user, 'area': request.user.area})
+        
     else:
-        messages.error(request, 'You have not permission to approve close.')
+        messages.error(request, 'You have not permission to approve close or th box is closed.')
 
     return redirect('main')
 
