@@ -138,7 +138,7 @@
                                         {% elif item.status == 'closed' and user.role == 'manager' %}
                                             <!-- box has sheets and is closed, user is manager -->
                                             <a href="{% url 'send_box_to_archive' item.id %}" class="btn btn-sm btn-primary send-to-archive" >
-                                                <i class="bi bi-send"></i> Send to Archive
+                                                <i class="bi bi-send"></i> Send to {{archive_responsible_area}}
                                             </a>
                                         {% elif user.role == 'user' %}
                                             <!-- box has sheets and user is user-->

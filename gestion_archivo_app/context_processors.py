@@ -1,4 +1,5 @@
 from .models import SystemConfigKeyValues
+from .models import User
 
 def system_config(request):
     try:
@@ -22,3 +23,26 @@ def system_config(request):
         "config_name_org": config_name_org
     }
     
+
+
+def archive_responsible_area(request):
+    """
+    Adds the area of the archive responsible user whose deposit matches the logged-in user's deposit.
+
+    Args:
+        request (HttpRequest): The current HTTP request.
+
+    Returns:
+        dict: A dictionary containing the archive responsible's area or None.
+    """
+    if request.user.is_authenticated and hasattr(request.user, 'deposit'):
+        try:
+            archive_responsible = User.objects.filter(
+                role='archive_responsible',
+                deposit=request.user.deposit
+            ).first()
+            return {'archive_responsible_area': archive_responsible.area if archive_responsible else None}
+        except Exception as e:
+            # Optional: Log the exception if needed
+            print(f"Error in archive_responsible_area context processor: {e}")
+    return {'archive_responsible_area': None}

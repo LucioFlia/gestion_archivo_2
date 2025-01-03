@@ -92,7 +92,7 @@
                 <div class="d-flex align-items-center">
                     {% if user.is_authenticated %}
                         <span class="text-white me-3">
-                            <strong>{{ user.username }}</strong> | {{ user.role }} | {{ user.area.name }}
+                            <strong>{{ user.username }}</strong> | {{ user.role }} | {{ user.area.name }} | {{ user.deposit.name }} | {{ archive_responsible_area }}
                         </span>
                         <a href="{% url 'logout' %}" class="btn btn-danger btn-sm">Log Out</a>
                     {% else %}

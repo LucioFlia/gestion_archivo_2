@@ -38,7 +38,7 @@ def user_passes_test_with_message(test_func, message="You do not have permission
             if test_func(request.user):
                 return view_func(request, *args, **kwargs)
             messages.error(request, message)
-            # Redirige a la misma página para mostrar el mensaje en `base.html`
+           
             return redirect(request.META.get('HTTP_REFERER', '/'))
         return _wrapped_view
     return decorator
@@ -826,6 +826,7 @@ def reject_box_close(request, box_id):
 @login_required
 def send_box_to_archive(request, box_id):
     box = get_object_or_404(Box, id=box_id)
+    
     if box.status == 'closed' and request.user.role == 'manager':
         previous_status = box.status
         box.status = 'waiting_archive'
