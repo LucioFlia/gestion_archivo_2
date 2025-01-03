@@ -8,12 +8,13 @@ from django.http import HttpResponse, JsonResponse
 
 
 from django.template.loader import get_template
-from django.db.models.signals import post_save, post_delete
+#from django.db.models.signals import post_save, post_delete
 
 from django.contrib import messages
-from reportlab.lib.pagesizes import A4
+#from reportlab.lib.pagesizes import A4
 from functools import wraps
 import pdfkit
+from django.db.models import Q
 
 from .models import (
     Box,
@@ -357,13 +358,17 @@ def create_doc_type(request):
 
 @login_required
 def main(request):
-    if request.user.role == 'admin':
-        items = Box.objects.all().order_by('-name')
-    else:
-        user_area = request.user.area
-        items = Box.objects.filter(area=user_area).order_by('-name')
-    # Filter open boxes
+    # get the boxes 
     user_area = request.user.area
+    user_deposit = request.user.deposit
+    user_role = request.user.role
+    if user_role == 'admin':
+        items = Box.objects.all().order_by('-name')
+    elif user_role == 'archive_responsible':
+        items = Box.objects.filter(Q(current_area=user_area) | Q(current_area=user_deposit)).order_by('-name')
+
+    else:
+        items = Box.objects.filter(area=user_area).order_by('-name')
     
     return render(request, "main.html", {"items": items})
 
@@ -531,45 +536,20 @@ def save_and_generate_security_seal(request, box_id):
     
     area = request.user.area
     user = request.user
+    previous_status = box.status
 
     if request.method == 'POST':
-        '''
-        try:
-            # Create the box
-            box = Box.objects.create(
-                box_type=box_type,
-                description=description,
-                user=user,
-                area=area,  # Assuming the user has an area associated
-                status='open',
-                current_area = area,
-                destruction_year = destruction_year,
-                name=name
-            )
-            box_fields = {k: v for k, v in box.__dict__.items() if not k.startswith("_")}
-            
-            BoxLog.objects.create(
-                log_type='new',
-                box=box,
-                previous_status='N/A',
-                new_status=box.status,
-                observations='Box created',
-                user=box.user,
-                user_area=box.user.area
-            )
-            '''
-        #temporal para probar la generacion de la faja
         box.status = 'closed'
         box.close_date = datetime.now()  
         box.save()
         BoxLog.objects.create(
         log_type='status_change',
         box=box,
-        previous_status=box.status,
+        previous_status=previous_status,
         new_status=box.status,
         observations='Box closure approved.',
-        user=request.user,
-        user_area=request.user.area
+        user=user,
+        user_area=area
         )
         options = {
         'page-size': 'A4',
@@ -666,7 +646,7 @@ def edit_box_documentation(request, box_id):
     box = get_object_or_404(Box, id=box_id)
     documentations = box.documentations.all()  
     can_manage_box = box.status == 'open' and (request.user.role == 'manager' or request.user.role == 'user')
-    print(can_manage_box)
+
     return render(request, "edit_box_documentation.html", {
         "box": box,
         "documentations": documentations,
@@ -760,6 +740,7 @@ def delete_documentation(request, doc_id):
 @login_required
 def request_close_box(request, box_id):
     box = get_object_or_404(Box, id=box_id)
+    
     if box.status == 'open':
         box.status = 'waiting_close'
         box.save()
@@ -767,7 +748,7 @@ def request_close_box(request, box_id):
         BoxLog.objects.create(
         log_type='status_change',
         box=box,
-        previous_status=box.status,
+        previous_status='open',
         new_status=box.status,
         observations='Close request submitted.',
         user=request.user,
@@ -842,7 +823,7 @@ def send_box_to_archive(request, box_id):
     box = get_object_or_404(Box, id=box_id)
     
     if box.status == 'closed' and request.user.role == 'manager':
-        previous_status = box.status
+        previous_area = box.area
         box.status = 'waiting_archive'
         archive = get_ar(request.user).area
         box.current_area = archive
@@ -851,11 +832,13 @@ def send_box_to_archive(request, box_id):
         message = request.POST.get('message')
         
         BoxLog.objects.create(
-            log_type='status_change',
+            log_type='area_change',
             box=box,
-            previous_status=previous_status,
-            new_status=box.status,
-            observations=f'Box sent to archive { archive.name }. Message: { message }',
+            previous_status = box.status,
+            new_status = box.status,
+            area_origin=previous_area,
+            area_destination = box.current_area,
+            observations=f'Box sent to archive. Message: { message }',
             user=request.user,
             user_area=request.user.area
     )

@@ -22,9 +22,11 @@
                 <th onclick="sortTable(0)">Log Type <i class="sort-indicator bi"></i></th>
                 <th onclick="sortTable(1)">Previous Status <i class="sort-indicator bi"></i></th>
                 <th onclick="sortTable(2)">New Status <i class="sort-indicator bi"></i></th>
-                <th onclick="sortTable(3)">User <i class="sort-indicator bi"></i></th>
-                <th onclick="sortTable(4)">Date <i class="sort-indicator bi"></i></th>
-                <th onclick="sortTable(5)">Observations <i class="sort-indicator bi"></i></th>
+                <th onclick="sortTable(3)">Area Origin <i class="sort-indicator bi"></i></th>
+                <th onclick="sortTable(4)">Area Destination<i class="sort-indicator bi"></i></th>
+                <th onclick="sortTable(5)">User <i class="sort-indicator bi"></i></th>
+                <th onclick="sortTable(6)">Date <i class="sort-indicator bi"></i></th>
+                <th onclick="sortTable(7)">Observations <i class="sort-indicator bi"></i></th>
             </tr>
         </thead>
         <tbody id="tableBodyId">
@@ -33,6 +35,11 @@
                 <td>{{ log.log_type }}</td>
                 <td>{{ log.previous_status }}</td>
                 <td>{{ log.new_status }}</td>
+
+                <td>{{ log.area_origin }}</td>
+                <td>{{ log.area_destination }}</td>
+                
+
                 <td>{{ log.user.username }}</td>
                 <td>{{ log.log_date|date:"d/m/Y H:i" }}</td>
                 <td>{{ log.observations }}</td>

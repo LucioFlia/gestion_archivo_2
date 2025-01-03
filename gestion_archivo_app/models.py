@@ -190,7 +190,6 @@ class Universe(models.Model):
 class BoxLog(models.Model):
     LOG_TYPE_CHOICES = [
         ('new', 'New Box'),
-        ('change_area', 'Change of Area'),
         ('doc_added', 'Document Added'),
         ('doc_removed', 'Document Removed'),
         ('doc_edited', 'Document Edited'),
@@ -209,6 +208,20 @@ class BoxLog(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     user_area = models.ForeignKey("Area", on_delete=models.PROTECT, related_name="user_logs")
     log_date = models.DateTimeField(auto_now_add=True)
+
+
+    def save(self, *args, **kwargs):
+        # Default area_origin to the user's area if not provided
+        if not self.area_origin and self.user:
+            self.area_origin = self.user.area
+
+        # Default area_destination to the user's area if not provided
+        if not self.area_destination and self.user:
+            self.area_destination = self.user.area
+
+        super().save(*args, **kwargs)  # Call the original save method
+
+
 
     def __str__(self):
         return f"Log for Box {self.box.id} - {self.previous_status} to {self.new_status}"
