@@ -574,6 +574,26 @@ def save_and_generate_security_seal(request, box_id):
         return response
     return redirect("main")
 
+@login_required
+def print_security_seal(request, box_id):
+    global is_download_ready
+    box = get_object_or_404(Box, id=box_id)
+
+    if request.method == 'POST':
+        path_to_wkhtmltopdf = r"./wkhtmltopdf.exe"
+        config = pdfkit.configuration(wkhtmltopdf=path_to_wkhtmltopdf)
+        template = get_template("box_security_seal_pdf.html")
+        html = template.render({"box": box, "area": request.user.area, "user": request.user})
+        pdf = pdfkit.from_string(html, False, configuration=config, options=options)
+        messages.success(request, 'The security seal has been successfully generated and saved in the Downloads folder.')
+        # Download PDF
+        response = HttpResponse(pdf, content_type="application/pdf")
+        response["Content-Disposition"] = f"attachment; filename=security_seal_box_{box.name}.pdf"
+        is_download_ready = True
+        return response
+    
+    return redirect("main")
+
 
 
 @login_required
@@ -755,6 +775,8 @@ def request_close_box(request, box_id):
         user_area=request.user.area
     )
     return redirect('main')
+  
+        
 
 @login_required
 def approve_close_box(request, box_id):

@@ -143,10 +143,15 @@
                                             </button>
                                         {% elif item.status == 'closed' and user.role == 'manager' %}
                                             <!-- box has sheets and is closed, user is manager -->
-                                                                                        <!-- Modal for rejecting the box closure -->
-                                                                                        <button type="button" class="btn btn-primary btn-sm" onclick="openConfirmModalWithForm('Are you sure you want to send box <strong>{{item.name}}</strong> to archive?', '{% url 'send_box_to_archive' item.id %}', 'success', 'Send to Archive')">
-                                                                                            <i class="bi bi-send"></i> Send to {{archive_responsible_area}}
-                                                                                        </button>
+                                            <!-- Modal for rejecting the box closure -->
+                                            <button type="button" class="btn btn-primary btn-sm" onclick="openConfirmModalWithForm('Are you sure you want to send box <strong>{{item.name}}</strong> to archive?', '{% url 'send_box_to_archive' item.id %}', 'success', 'Send to Archive')">
+                                                <i class="bi bi-send"></i> Send to {{archive_responsible_area}}
+                                            </button>
+                                            
+                                            <a href="{% url 'print_security_seal' item.id %}" class="btn btn-secondary">
+                                                <i class="bi bi-printer"></i> &nbsp; Print Seal
+                                            </a>
+                                            
                                         {% elif user.role == 'user' %}
                                             <!-- box has sheets and user is user-->
                                             None (User is user)

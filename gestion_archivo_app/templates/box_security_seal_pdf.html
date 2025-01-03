@@ -19,24 +19,24 @@
 
         .label {
             border: 2px solid #000;
-            padding: 20px;
-            height: 45%;
+            padding: 15px;
+            height: 35%;
             box-sizing: border-box;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             display: flex;
             flex-direction: column;
             justify-content: space-around;
         }
 
         .label h1 {
-            font-size: 5rem;
+            font-size: 4rem;
             text-align: center;
             margin: 0;
         }
 
         .info {
-            font-size: 1.2rem;
-            margin: 10px 0;
+            font-size: 1.1rem;
+            margin: 8px 0;
         }
 
         .info span {
@@ -67,6 +67,10 @@
         <div class="info">
             <span>Area:</span> {{ box.area.name }}
         </div>
+        <div class="info" style="display: flex; justify-content: space-between;">
+            <span>Manager: {{ user.last_name }}, {{ user.first_name }},</span>  
+            <span style="display: flex; justify-content: flex-end;">Signature: ___________________________________________</span>
+        </div>
         <div class="info">
             <span>Box Type:</span> {{ box.box_type }}
         </div>
@@ -79,11 +83,7 @@
         <div class="info">
             <span>Creator:</span> {{ box.user.last_name }}, {{ box.user.first_name }} 
         </div>
-        <div class="info">
-            <span>Manager:</span> {{ user.last_name }}, {{ user.first_name }} 
-            <span>, signature: ___________________________________________</span>
-        </div>
-    
+
         <div class="info">
             <span>Last Update:</span> {{ box.date_close|date:"d/m/Y, H:i" }}
         </div>          
@@ -99,8 +99,59 @@
                 <span>Description:</span> {{ box.description }}
             {% endif %}
         </div>
+        <div class="info" style="display: flex; justify-content: space-between;">
+            <span>Received by:</span>  
+            <span>Signature: ___________________________________________</span>
+        </div>
     </div>
 
+    <div class="container">
+        <!-- Primer Rótulo -->
+        <div class="label">
+            <div class="info">
+                <span>Box Name:</span> {{ box.name }}
+            </div>
+            <div class="info">
+                <span>Area:</span> {{ box.area.name }}
+            </div>
+            <div class="info" style="display: flex; justify-content: space-between;">
+                <span>Manager: {{ user.last_name }}, {{ user.first_name }},</span>  
+                <span style="display: flex; justify-content: flex-end;">Signature: ___________________________________________</span>
+            </div>
+            <div class="info">
+                <span>Box Type:</span> {{ box.box_type }}
+            </div>
+            <div class="info">
+                <span>Opening Date:</span> {{ box.creation_date|date:"d/m/Y, H:i" }}
+            </div>
+            <div class="info">
+                <span>Destruction Year:</span> {{ box.destruction_year }}
+            </div>
+            <div class="info">
+                <span>Creator:</span> {{ box.user.last_name }}, {{ box.user.first_name }} 
+            </div>
+    
+            <div class="info">
+                <span>Last Update:</span> {{ box.date_close|date:"d/m/Y, H:i" }}
+            </div>          
+            <div class="info">
+                <span>Close Date:</span> {{ box.close_date|date:"d/m/Y, H:i" }}
+            </div>
+            <div class="info">
+                <span>Total Sheets:</span> {{ box.total_sheets }}
+            </div>
+    
+            <div class="info">
+                {% if box.description %}
+                    <span>Description:</span> {{ box.description }}
+                {% endif %}
+            </div>
+            <div class="info" style="display: flex; justify-content: space-between;">
+                <span>Received by:</span>  
+                <span>Signature: ___________________________________________</span>
+            </div>
+        </div>
+    
 
    
 </body>
