@@ -115,9 +115,14 @@
                                         {% elif item.status == 'open' %}
                                             <!-- Box has sheets and is open -->
                                             {% if user.role == 'manager' or user.role == 'user' %}
-                                                <a href="{% url 'request_close_box' item.id %}" class="btn btn-sm btn-warning request-close">
-                                                    <i class="bi bi-box-arrow-right"></i> Request Close
-                                                </a>
+   
+                                        <!-- Modal for approve the box closure -->
+                                        <button type="button" class="btn btn-warning btn-sm" onclick="openConfirmModal('Are you sure you want to request closure of box <strong>{{item.name}}</strong>?', '{% url 'request_close_box' item.id %}', 'success', 'Approve Request')">
+                                            <i class="bi bi-box-arrow-right"></i> Request Close
+                                        </button>
+
+
+
                                             {% else %}
                                                 <!-- Box has sheets and is open -->
                                                 <!-- user is AR or Admin -->
@@ -128,6 +133,10 @@
                                         <a href="{% url 'approve_close_box' item.id %}" class="btn btn-sm btn-success approve-close">
                                             <i class="bi bi-check-circle"></i> Approve Close
                                         </a>
+                                        <!-- Modal for approve the box closure -->
+                                        <button type="button" class="btn btn-sucess btn-sm" onclick="openConfirmModal('Are you sure you want to approve the closure of box <strong>{{item.name}}</strong>?', '{% url 'approve_close_box' item.id %}', 'success', 'Approve Close')">
+                                            <i class="bi bi-check-circle"></i> Reject Close
+                                        </button>
                                                 
                                                 
                                       
@@ -137,9 +146,10 @@
                                             </button>
                                         {% elif item.status == 'closed' and user.role == 'manager' %}
                                             <!-- box has sheets and is closed, user is manager -->
-                                            <a href="{% url 'send_box_to_archive' item.id %}" class="btn btn-sm btn-primary send-to-archive" >
-                                                <i class="bi bi-send"></i> Send to {{archive_responsible_area}}
-                                            </a>
+                                                                                        <!-- Modal for rejecting the box closure -->
+                                                                                        <button type="button" class="btn btn-primary btn-sm" onclick="openConfirmModalWithForm('Are you sure you want to send box <strong>{{item.name}}</strong> to archive?', '{% url 'send_box_to_archive' item.id %}', 'success', 'Send to Archive')">
+                                                                                            <i class="bi bi-send"></i> Send to {{archive_responsible_area}}
+                                                                                        </button>
                                         {% elif user.role == 'user' %}
                                             <!-- box has sheets and user is user-->
                                             None (User is user)

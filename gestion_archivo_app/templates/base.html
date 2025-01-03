@@ -207,7 +207,7 @@
             document.getElementById('confirmModalMessage').innerHTML = `
                 <p>${message}</p>
                 <div class="mb-3">
-                    <label for="rejectionReason" class="form-label">Reason for Rejection</label>
+                    <label for="rejectionReason" class="form-label">Message</label>
                     <textarea class="form-control" name="rejection_reason" id="rejectionReason" rows="3" required></textarea>
                 </div>
             `;
@@ -236,7 +236,7 @@
         function submitRejectionForm(actionUrl) {
             const reason = document.getElementById('rejectionReason').value;
             if (reason.trim() === "") {
-                alert('Please provide a reason for rejection.');
+                alert('Please provide a Message.');
                 return;
             }
     

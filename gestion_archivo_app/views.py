@@ -831,12 +831,13 @@ def send_box_to_archive(request, box_id):
         previous_status = box.status
         box.status = 'waiting_archive'
         box.save()
+        message = request.POST.get('message')
         BoxLog.objects.create(
             log_type='status_change',
             box=box,
             previous_status=previous_status,
             new_status=box.status,
-            observations='Box sent to archive.',
+            observations=f'Box sent to archive. Message: {message}',
             user=request.user,
             user_area=request.user.area
     )
