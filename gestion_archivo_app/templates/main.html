@@ -116,8 +116,8 @@
                                             <!-- Box has sheets and is open -->
                                             {% if user.role == 'manager' or user.role == 'user' %}
    
-                                        <!-- Modal for approve the box closure -->
-                                        <button type="button" class="btn btn-warning btn-sm" onclick="openConfirmModal('Are you sure you want to request closure of box <strong>{{item.name}}</strong>?', '{% url 'request_close_box' item.id %}', 'success', 'Approve Request')">
+                                        <!-- Modal for request the box closure -->
+                                        <button type="button" class="btn btn-warning btn-sm" onclick="openConfirmModal('Are you sure you want to request closure of box <strong>{{item.name}}</strong>?', '{% url 'request_close_box' item.id %}', 'warning', 'Request Close')">
                                             <i class="bi bi-box-arrow-right"></i> Request Close
                                         </button>
 
@@ -133,10 +133,7 @@
                                         <a href="{% url 'approve_close_box' item.id %}" class="btn btn-sm btn-success approve-close">
                                             <i class="bi bi-check-circle"></i> Approve Close
                                         </a>
-                                        <!-- Modal for approve the box closure -->
-                                        <button type="button" class="btn btn-sucess btn-sm" onclick="openConfirmModal('Are you sure you want to approve the closure of box <strong>{{item.name}}</strong>?', '{% url 'approve_close_box' item.id %}', 'success', 'Approve Close')">
-                                            <i class="bi bi-check-circle"></i> Reject Close
-                                        </button>
+                               
                                                 
                                                 
                                       

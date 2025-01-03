@@ -92,7 +92,7 @@
                 <div class="d-flex align-items-center">
                     {% if user.is_authenticated %}
                         <span class="text-white me-3">
-                            <strong>{{ user.username }}</strong> | {{ user.role }} | {{ user.area.name }} | {{ user.deposit.name }} | {{ archive_responsible_area }}
+                            <strong>{{ user.username }}</strong> | {{ user.role }} | {{ user.area.name }} ( {{ archive_responsible_area }} <i class="bi bi-arrow-right"></i> {{ user.deposit.name }} )
                         </span>
                         <a href="{% url 'logout' %}" class="btn btn-danger btn-sm">Log Out</a>
                     {% else %}
@@ -193,6 +193,9 @@
         } else if (buttonType === 'success') {
             actionButton.className = 'btn btn-success';
             document.getElementById('confirmModalIcon').className = 'bi bi-check-circle';
+        } else if (buttonType === 'warning') {
+            actionButton.className = 'btn btn-warning';
+            document.getElementById('confirmModalIcon').className = 'bi bi-box-arrow-right';
         }
 
         // Set the button text
@@ -208,7 +211,7 @@
                 <p>${message}</p>
                 <div class="mb-3">
                     <label for="rejectionReason" class="form-label">Message</label>
-                    <textarea class="form-control" name="rejection_reason" id="rejectionReason" rows="3" required></textarea>
+                    <textarea class="form-control" name="message" id="rejectionReason" rows="3" required></textarea>
                 </div>
             `;
     
@@ -223,6 +226,9 @@
             } else if (buttonType === 'success') {
                 actionButton.className = 'btn btn-success';
                 document.getElementById('confirmModalIcon').className = 'bi bi-check-circle';
+            } else if (buttonType === 'warning') {
+                actionButton.className = 'btn btn-warning';
+                document.getElementById('confirmModalIcon').className = 'bi bi-box-arrow-right';
             }
     
             // Set the button text
@@ -255,7 +261,7 @@
             // Rejection reason
             const rejectionInput = document.createElement('input');
             rejectionInput.type = 'hidden';
-            rejectionInput.name = 'rejection_reason';
+            rejectionInput.name = 'message';
             rejectionInput.value = reason;
             form.appendChild(rejectionInput);
     

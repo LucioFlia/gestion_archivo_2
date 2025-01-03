@@ -494,7 +494,7 @@ def save_and_generate_pdf(request):
                 destruction_year = destruction_year,
                 name=name
             )
-            box_fields = {k: v for k, v in box.__dict__.items() if not k.startswith("_")}
+            
             
             BoxLog.objects.create(
                 log_type='new',
@@ -794,7 +794,7 @@ def reject_box_close(request, box_id):
     box = get_object_or_404(Box, id=box_id)
   
     if request.method == 'POST' and box.status == 'waiting_close' and request.user.role == 'manager':
-        rejection_reason = request.POST.get('rejection_reason')
+        message = request.POST.get('message')
 
         # Capture the previous status before updating
         previous_status = box.status
@@ -809,7 +809,7 @@ def reject_box_close(request, box_id):
             box=box,
             previous_status=previous_status,
             new_status=box.status,
-            observations=f'Closure rejected: {rejection_reason}',
+            observations=f'Closure rejected: {message}',
             user=request.user,
             user_area=request.user.area
         )
@@ -821,7 +821,21 @@ def reject_box_close(request, box_id):
     return redirect('main')
 
 
-
+def get_ar(user):
+    """
+        returns the first AR of the user
+    """
+    if user.is_authenticated and hasattr(user, 'deposit'):
+        try:
+            archive_responsible = User.objects.filter(
+                role='archive_responsible',
+                deposit=user.deposit
+            ).first()
+            return  archive_responsible if archive_responsible else None
+        except Exception as e:
+            # Optional: Log the exception if needed
+            print(f"Error in archive_responsible: {e}")
+    return  None
 
 @login_required
 def send_box_to_archive(request, box_id):
@@ -830,14 +844,18 @@ def send_box_to_archive(request, box_id):
     if box.status == 'closed' and request.user.role == 'manager':
         previous_status = box.status
         box.status = 'waiting_archive'
+        archive = get_ar(request.user).area
+        box.current_area = archive
+        print (archive.name)
         box.save()
         message = request.POST.get('message')
+        
         BoxLog.objects.create(
             log_type='status_change',
             box=box,
             previous_status=previous_status,
             new_status=box.status,
-            observations=f'Box sent to archive. Message: {message}',
+            observations=f'Box sent to archive { archive.name }. Message: { message }',
             user=request.user,
             user_area=request.user.area
     )
